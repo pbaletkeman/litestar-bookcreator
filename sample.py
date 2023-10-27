@@ -7,12 +7,16 @@ import unicodedata
 from typing import TYPE_CHECKING, Any
 from uuid import UUID
 
+from litestar import HttpMethod
+from litestar import openapi
+from litestar import route
+from litestar.openapi.spec import Server
+from litestar.openapi.spec import ServerVariable
 from litestar.pagination import OffsetPagination
 from pydantic import BaseModel as _BaseModel
 from pydantic import TypeAdapter
 from sqlalchemy.orm import Mapped, declarative_mixin, mapped_column
 from sqlalchemy.types import String
-
 from litestar import Controller
 from litestar import Litestar, get, post, delete, patch
 from litestar.contrib.sqlalchemy.base import UUIDAuditBase
@@ -22,6 +26,8 @@ from litestar.contrib.sqlalchemy.repository import (
     SQLAlchemyAsyncRepository,
 )
 from litestar.di import Provide
+from litestar.openapi import OpenAPIConfig
+from litestar.openapi import OpenAPIController
 from litestar.params import Parameter
 from litestar.repository.filters import LimitOffset
 
@@ -213,7 +219,7 @@ class BlogController(Controller):
         await blog_post_repo.session.commit()
         return BlogPostDTO.model_validate(obj)
 
-    @patch(path="/{id:uuid}")
+    @route(path="/{id:uuid}", http_method=[HttpMethod.PUT, HttpMethod.PATCH])
     async def update_blog(
         self,
         blog_post_repo: BlogPostRepository,
@@ -240,6 +246,12 @@ class BlogController(Controller):
 
 app = Litestar(
     route_handlers=[BlogController],
+    openapi_config=OpenAPIConfig(
+        title="My API", version="1.0.0",
+        root_schema_site="swagger",
+        path="/docs",
+        create_examples=True,
+    ),
     on_startup=[on_startup],
     plugins=[SQLAlchemyInitPlugin(config=sqlalchemy_config)],
     dependencies={"limit_offset": Provide(provide_limit_offset_pagination, sync_to_thread=False)},
