@@ -8,17 +8,14 @@ from typing import TYPE_CHECKING, Any
 from uuid import UUID
 
 from litestar import HttpMethod
-from litestar import openapi
 from litestar import route
-from litestar.openapi.spec import Server
-from litestar.openapi.spec import ServerVariable
 from litestar.pagination import OffsetPagination
 from pydantic import BaseModel as _BaseModel
 from pydantic import TypeAdapter
 from sqlalchemy.orm import Mapped, declarative_mixin, mapped_column
 from sqlalchemy.types import String
 from litestar import Controller
-from litestar import Litestar, get, post, delete, patch
+from litestar import Litestar, get, post, delete
 from litestar.contrib.sqlalchemy.base import UUIDAuditBase
 from litestar.contrib.sqlalchemy.plugins import AsyncSessionConfig, SQLAlchemyAsyncConfig, SQLAlchemyInitPlugin
 from litestar.contrib.sqlalchemy.repository import (
@@ -27,7 +24,6 @@ from litestar.contrib.sqlalchemy.repository import (
 )
 from litestar.di import Provide
 from litestar.openapi import OpenAPIConfig
-from litestar.openapi import OpenAPIController
 from litestar.params import Parameter
 from litestar.repository.filters import LimitOffset
 
@@ -127,40 +123,40 @@ class SQLAlchemyAsyncSlugRepository(SQLAlchemyAsyncRepository[ModelT]):
 # The `AuditBase` class includes the same UUID` based primary key (`id`) and 2
 # additional columns: `created` and `updated`. `created` is a timestamp of when the
 # record created, and `updated` is the last time the record was modified.
-class BlogPost(UUIDAuditBase, SlugKey):
-    title: Mapped[str]
-    content: Mapped[str]
+class MetaData(UUIDAuditBase, SlugKey):
+    name: Mapped[str]
+    description: Mapped[str]
 
 
-class BlogPostRepository(SQLAlchemyAsyncSlugRepository[BlogPost]):
+class MetaDataRepository(SQLAlchemyAsyncSlugRepository[MetaData]):
     """Blog Post repository."""
 
-    model_type = BlogPost
+    model_type = MetaData
 
 
-class BlogPostDTO(BaseModel):
+class MetaDataDTO(BaseModel):
     id: UUID | None
     slug: str
-    title: str
-    content: str
+    name: str
+    description: str
 
 
-class BlogPostCreate(BaseModel):
-    title: str
-    content: str
+class MetaDataCreate(BaseModel):
+    name: str
+    description: str
 
 
-class BlogPostUpdate(BaseModel):
-    title: str
-    content: str
+class MetaDataUpdate(BaseModel):
+    name: str
+    description: str
 
 
 # we can optionally override the default `select` used for the repository to pass in
 # specific SQL options such as join details
-async def provide_blog_post_repo(db_session: AsyncSession) -> BlogPostRepository:
+async def provide_meta_data_repo(db_session: AsyncSession) -> MetaDataRepository:
     """This provides a simple example demonstrating how to override the join options
     for the repository."""
-    return BlogPostRepository(session=db_session)
+    return MetaDataRepository(session=db_session)
 
 
 session_config = AsyncSessionConfig(expire_on_commit=False)
@@ -176,82 +172,79 @@ async def on_startup() -> None:
         await conn.run_sync(UUIDAuditBase.metadata.create_all)
 
 
-class BlogController(Controller):
-    path = '/blog'
+class MetaDataController(Controller):
+    path = '/meta-data'
+    controller_tag = ['Meta Data']
 
-    dependencies = {"blog_post_repo": Provide(provide_blog_post_repo)}
+    dependencies = {"meta_data_repo": Provide(provide_meta_data_repo)}
 
-    # @get(path="/")
-    # async def get_blogs(self, blog_post_repo: BlogPostRepository, ) -> list[BlogPostDTO]:
-    #     """Interact with SQLAlchemy engine and session."""
-    #     objs = await blog_post_repo.list()
-    #     type_adapter = TypeAdapter(list[BlogPostDTO])
-    #     return type_adapter.validate_python(objs)
-
-    @get(path='/')
-    async def list_blogs(
+    @get(path='/', tags=controller_tag)
+    async def list_items(
         self,
-        blog_post_repo: BlogPostRepository,
+        meta_data_repo: MetaDataRepository,
         limit_offset: LimitOffset,
-    ) -> OffsetPagination[BlogPostDTO]:
+    ) -> OffsetPagination[MetaDataDTO]:
         """List authors."""
-        results, total = await blog_post_repo.list_and_count(limit_offset)
-        type_adapter = TypeAdapter(list[BlogPostDTO])
-        return OffsetPagination[BlogPostDTO](
+        results, total = await meta_data_repo.list_and_count(limit_offset)
+        type_adapter = TypeAdapter(list[MetaDataDTO])
+        return OffsetPagination[MetaDataDTO](
             items=type_adapter.validate_python(results),
             total=total,
             limit=limit_offset.limit,
             offset=limit_offset.offset,
         )
 
-    @get(path="/{post_slug:str}")
-    async def get_blog_details(self, post_slug: str, blog_post_repo: BlogPostRepository, ) -> BlogPostDTO:
+    @get(path="/{item_slug:str}", tags=controller_tag)
+    async def get_item_details(self, item_slug: str, meta_data_repo: MetaDataRepository, ) -> MetaDataDTO:
         """Interact with SQLAlchemy engine and session."""
-        obj = await blog_post_repo.get_one(slug=post_slug)
-        return BlogPostDTO.model_validate(obj)
+        obj = await meta_data_repo.get_one(slug=item_slug)
+        return MetaDataDTO.model_validate(obj)
 
-    @post(path="/")
-    async def create_blog(self, blog_post_repo: BlogPostRepository, data: BlogPostCreate, ) -> BlogPostDTO:
-        """Create a new blog post."""
+    @post(path="/", tags=controller_tag)
+    async def create_item(self, meta_data_repo: MetaDataRepository, data: MetaDataCreate, ) -> MetaDataDTO:
+        """Create a new meta_data."""
         _data = data.model_dump(exclude_unset=True, by_alias=False, exclude_none=True)
-        _data["slug"] = await blog_post_repo.get_available_slug(_data["title"])
-        obj = await blog_post_repo.add(BlogPost(**_data))
-        await blog_post_repo.session.commit()
-        return BlogPostDTO.model_validate(obj)
+        _data["slug"] = await meta_data_repo.get_available_slug(_data["name"])
+        obj = await meta_data_repo.add(MetaData(**_data))
+        await meta_data_repo.session.commit()
+        return MetaDataDTO.model_validate(obj)
 
-    @route(path="/{id:uuid}", http_method=[HttpMethod.PUT, HttpMethod.PATCH])
-    async def update_blog(
+    @route(path="/{id:uuid}", http_method=[HttpMethod.PUT, HttpMethod.PATCH], tags=controller_tag)
+    async def update_item(
         self,
-        blog_post_repo: BlogPostRepository,
-        data: BlogPostUpdate,
+        meta_data_repo: MetaDataRepository,
+        data: MetaDataUpdate,
         id: UUID = Parameter(title="MetaData.py ID", description="The meta_data to update.", ),
-    ) -> BlogPostUpdate:
+    ) -> MetaDataUpdate:
         """Update an meta_data."""
         raw_obj = data.model_dump(exclude_unset=True, exclude_none=True)
         raw_obj.update({"id": id})
-        obj = await blog_post_repo.update(BlogPost(**raw_obj))
-        await blog_post_repo.session.commit()
-        return BlogPostUpdate.model_validate(obj)
+        obj = await meta_data_repo.update(MetaData(**raw_obj))
+        await meta_data_repo.session.commit()
+        return MetaDataUpdate.model_validate(obj)
 
-    @delete(path="/{id:uuid}")
-    async def delete_blog(
+    @delete(path="/{id:uuid}", tags=controller_tag)
+    async def delete_item(
         self,
-        blog_post_repo: BlogPostRepository,
+        meta_data_repo: MetaDataRepository,
         id: UUID = Parameter(title="MetaData.py ID", description="The meta_data to delete.", ),
     ) -> None:
         """Delete a meta_data from the system."""
-        _ = await blog_post_repo.delete(id)
-        await blog_post_repo.session.commit()
+        _ = await meta_data_repo.delete(id)
+        await meta_data_repo.session.commit()
 
 
 app = Litestar(
-    route_handlers=[BlogController],
+    route_handlers=[MetaDataController],
     openapi_config=OpenAPIConfig(
         title="My API", version="1.0.0",
-        root_schema_site="swagger",
+        root_schema_site="elements",  # swagger, elements, redoc
         path="/docs",
-        create_examples=True,
+        create_examples=False,
     ),
+    exception_handlers={
+        # exceptions.ApplicationError: exceptions.exception_to_http_response,
+    },
     on_startup=[on_startup],
     plugins=[SQLAlchemyInitPlugin(config=sqlalchemy_config)],
     dependencies={"limit_offset": Provide(provide_limit_offset_pagination, sync_to_thread=False)},
