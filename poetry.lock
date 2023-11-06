@@ -604,13 +604,13 @@ six = ">=1.13.0"
 
 [[package]]
 name = "litestar"
-version = "2.3.1"
+version = "2.3.2"
 description = "Litestar - A production-ready, highly performant, extensible ASGI API Framework"
 optional = false
 python-versions = "<4.0,>=3.8"
 files = [
-    {file = "litestar-2.3.1-py3-none-any.whl", hash = "sha256:f158c8540425c7cf8cc896e21a1922000da65688e0982cf8c26c863163ba59dd"},
-    {file = "litestar-2.3.1.tar.gz", hash = "sha256:c12e2fd6d53932cf4e631447fe19a0c426523fbb8e52b6bcddf71e900c7184c4"},
+    {file = "litestar-2.3.2-py3-none-any.whl", hash = "sha256:a2301e5a786fa0466a00333f99694972332a85fad69ce222179ce342d84ee0ed"},
+    {file = "litestar-2.3.2.tar.gz", hash = "sha256:983b61b5a1a07de2f8e34974e21dc2adf5c3aab767ca89cbe229cecca54b92c3"},
 ]
 
 [package.dependencies]
@@ -1581,13 +1581,13 @@ files = [
 
 [[package]]
 name = "uvicorn"
-version = "0.24.0"
+version = "0.24.0.post1"
 description = "The lightning-fast ASGI server."
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "uvicorn-0.24.0-py3-none-any.whl", hash = "sha256:3d19f13dfd2c2af1bfe34dd0f7155118ce689425fdf931177abe832ca44b8a04"},
-    {file = "uvicorn-0.24.0.tar.gz", hash = "sha256:368d5d81520a51be96431845169c225d771c9dd22a58613e1a181e6c4512ac33"},
+    {file = "uvicorn-0.24.0.post1-py3-none-any.whl", hash = "sha256:7c84fea70c619d4a710153482c0d230929af7bcf76c7bfa6de151f0a3a80121e"},
+    {file = "uvicorn-0.24.0.post1.tar.gz", hash = "sha256:09c8e5a79dc466bdf28dead50093957db184de356fcdc48697bad3bde4c2588e"},
 ]
 
 [package.dependencies]
@@ -1819,4 +1819,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "1d4e83db2df6632a00d3a1ae83aea550994863309f711ba1e1cc8644abbc85e2"
+content-hash = "d9e4f710011b1616db1b2c46d2fad93548cb28e8f0767e3c41639f65181819b3"
