@@ -8,6 +8,8 @@ from litestar import route
 from litestar.pagination import OffsetPagination
 from pydantic import TypeAdapter
 from sqlalchemy import ForeignKey
+from sqlalchemy.ext.asyncio import AsyncAttrs
+
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from litestar import Controller
 from litestar import get, post, delete
@@ -33,10 +35,10 @@ class MetaDataTag(UUIDAuditBase, SlugKey):
     """
     __tablename__ = 'meta_data_tag'
 
-    sort_order: Mapped[int | None] = 0
+    sort_order: Mapped[int | None]
     name: Mapped[str]
     tag: Mapped[str]
-    is_empty_tag: Mapped[int | None] = 0
+    is_empty_tag: Mapped[bool | None]
     description: Mapped[str | None] = None
 
     attribute_id: Mapped[Optional[int]] = mapped_column(ForeignKey("attribute.id"))
@@ -48,7 +50,7 @@ class Attribute(UUIDAuditBase):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str]
-    sort_order: Mapped[int | None] = 0
+    sort_order: Mapped[int | None]
     attributes: Mapped[List["MetaDataTag"]] = relationship(back_populates="item_tag")
 
 
@@ -64,14 +66,14 @@ class MetaDataTagDTO(BaseModel):
     slug: str
     name: str
     tag: str
-    is_empty_tag: Optional[int] = 0
+    is_empty_tag: Optional[bool] = False
     description: Optional[str] = None
 
 
 class MetaDataTagCreate(BaseModel):
     name: str
     tag: str
-    is_empty_tag: Optional[int] = 0
+    is_empty_tag: Optional[bool] = False
     sort_order: Optional[int] = 0
     description: Optional[str] = None
 
@@ -80,7 +82,7 @@ class MetaDataTagUpdate(BaseModel):
     sort_order: Optional[int] = 0
     name: str
     tag: str
-    is_empty_tag: Optional[int] = 0
+    is_empty_tag: Optional[bool] = False
     description: Optional[str] = None
 
 

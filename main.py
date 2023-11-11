@@ -11,12 +11,17 @@ from litestar.openapi import OpenAPIConfig
 if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession
 
+from sqlalchemy.ext.asyncio import create_async_engine
+
 from shared import provide_limit_offset_pagination
 from meta_data import MetaDataTagController
 
 session_config = AsyncSessionConfig(expire_on_commit=False)
 sqlalchemy_config = SQLAlchemyAsyncConfig(
     connection_string="sqlite+aiosqlite:///test.sqlite", session_config=session_config
+    # connection_string="postgresql+asyncpg://pete:pete@host.docker.internal:5432/sample_project",
+    # session_config=session_config
+
 )  # Create 'async_session' dependency.
 sqlalchemy_plugin = SQLAlchemyInitPlugin(config=sqlalchemy_config)
 
