@@ -15,7 +15,6 @@ from litestar.contrib.sqlalchemy.repository import (
 )
 from litestar.params import Parameter
 from litestar.repository.filters import LimitOffset
-from sqlalchemy.ext.asyncio import AsyncAttrs
 
 if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession

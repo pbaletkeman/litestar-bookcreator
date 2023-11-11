@@ -8,8 +8,7 @@ from litestar import route
 from litestar.pagination import OffsetPagination
 from pydantic import TypeAdapter
 from sqlalchemy import ForeignKey
-from sqlalchemy.ext.asyncio import AsyncAttrs
-
+from sqlalchemy.types import String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from litestar import Controller
 from litestar import get, post, delete
@@ -35,10 +34,10 @@ class MetaDataTag(UUIDAuditBase, SlugKey):
     """
     __tablename__ = 'meta_data_tag'
 
-    is_empty_tag: Mapped[bool | None]
-    sort_order: Mapped[int | None]
-    name: Mapped[str]
-    tag: Mapped[str]
+    is_empty_tag: Mapped[bool | None] = mapped_column(default=False)
+    sort_order: Mapped[int] = mapped_column(nullable=False, default=0)
+    name: Mapped[str] = mapped_column(String(length=30), nullable=False)
+    tag: Mapped[str] = mapped_column(String(length=30), nullable=False)
     description: Mapped[str | None]
 
     attributes: Mapped[List["Attribute"]] = relationship(back_populates="item_tag")
@@ -55,11 +54,11 @@ class Attribute(UUIDAuditBase):
     __tablename__ = "attribute"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    sort_order: Mapped[int | None]  # = mapped_column("sortOrder")
-    name: Mapped[str]
+    sort_order: Mapped[int | None] = mapped_column(nullable=False, default=0)  # = mapped_column("sortOrder")
+    name: Mapped[str] = mapped_column(String(length=30), nullable=False)
 
-    meta_data_tag_id: Mapped[Optional[UUID]] = mapped_column(ForeignKey("meta_data_tag.id"))
-    item_tag: Mapped[Optional["MetaDataTag"]] = relationship(back_populates="attributes", lazy="selectin")
+    meta_data_tag_id: Mapped[UUID] = mapped_column(ForeignKey("meta_data_tag.id"))
+    item_tag: Mapped["MetaDataTag"] = relationship(back_populates="attributes", lazy="selectin")
 
     def __init__(self, **kw: Any):
         super().__init__(**kw)
