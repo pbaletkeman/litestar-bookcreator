@@ -12,7 +12,7 @@ if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession
 
 from shared import provide_limit_offset_pagination
-from meta_data import MetaDataController
+from meta_data import MetaDataTagController
 
 session_config = AsyncSessionConfig(expire_on_commit=False)
 sqlalchemy_config = SQLAlchemyAsyncConfig(
@@ -28,7 +28,7 @@ async def on_startup() -> None:
 
 
 app = Litestar(
-    route_handlers=[MetaDataController],
+    route_handlers=[MetaDataTagController],
     openapi_config=OpenAPIConfig(
         title="My API", version="1.0.0",
         root_schema_site="elements",  # swagger, elements, redoc
