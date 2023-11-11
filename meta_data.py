@@ -35,23 +35,36 @@ class MetaDataTag(UUIDAuditBase, SlugKey):
     """
     __tablename__ = 'meta_data_tag'
 
+    is_empty_tag: Mapped[bool | None]
     sort_order: Mapped[int | None]
     name: Mapped[str]
     tag: Mapped[str]
-    is_empty_tag: Mapped[bool | None]
-    description: Mapped[str | None] = None
+    description: Mapped[str | None]
 
-    attribute_id: Mapped[Optional[int]] = mapped_column(ForeignKey("attribute.id"))
-    item_tag: Mapped[Optional["Attribute"]] = relationship(back_populates="attributes")
+    attributes: Mapped[List["Attribute"]] = relationship(back_populates="item_tag")
+
+    def __init__(self, **kw: Any):
+        super().__init__(**kw)
+        if self.is_empty_tag is None:
+            self.is_empty_tag = False
+        if self.sort_order is None:
+            self.sort_order = 0
 
 
 class Attribute(UUIDAuditBase):
     __tablename__ = "attribute"
 
     id: Mapped[int] = mapped_column(primary_key=True)
+    sort_order: Mapped[int | None]  # = mapped_column("sortOrder")
     name: Mapped[str]
-    sort_order: Mapped[int | None]
-    attributes: Mapped[List["MetaDataTag"]] = relationship(back_populates="item_tag")
+
+    meta_data_tag_id: Mapped[Optional[UUID]] = mapped_column(ForeignKey("meta_data_tag.id"))
+    item_tag: Mapped[Optional["MetaDataTag"]] = relationship(back_populates="attributes", lazy="selectin")
+
+    def __init__(self, **kw: Any):
+        super().__init__(**kw)
+        if self.sort_order is None:
+            self.sort_order = 0
 
 
 class MetaDataTagRepository(SQLAlchemyAsyncSlugRepository[MetaDataTag]):
@@ -102,9 +115,9 @@ class MetaDataTagController(Controller):
 
     @get(path='/', tags=controller_tag)
     async def list_items(
-        self,
-        meta_data_tag_repo: MetaDataTagRepository,
-        limit_offset: LimitOffset,
+            self,
+            meta_data_tag_repo: MetaDataTagRepository,
+            limit_offset: LimitOffset,
     ) -> OffsetPagination[MetaDataTagDTO]:
         """List items."""
         results, total = await meta_data_tag_repo.list_and_count(limit_offset)
@@ -133,10 +146,10 @@ class MetaDataTagController(Controller):
 
     @route(path="/{id:uuid}", http_method=[HttpMethod.PUT, HttpMethod.PATCH], tags=controller_tag)
     async def update_item(
-        self,
-        meta_data_tag_repo: MetaDataTagRepository,
-        data: MetaDataTagUpdate,
-        id: UUID = Parameter(title="MetaData.py ID", description="The meta_data to update.", ),
+            self,
+            meta_data_tag_repo: MetaDataTagRepository,
+            data: MetaDataTagUpdate,
+            id: UUID = Parameter(title="MetaData.py ID", description="The meta_data to update.", ),
     ) -> MetaDataTagUpdate:
         """Update an meta_data tag."""
         raw_obj = data.model_dump(exclude_unset=True, exclude_none=True)
@@ -147,9 +160,9 @@ class MetaDataTagController(Controller):
 
     @delete(path="/{id:uuid}", tags=controller_tag)
     async def delete_item(
-        self,
-        meta_data_tag_repo: MetaDataTagRepository,
-        id: UUID = Parameter(title="MetaData.py ID", description="The meta_data to delete.", ),
+            self,
+            meta_data_tag_repo: MetaDataTagRepository,
+            id: UUID = Parameter(title="MetaData.py ID", description="The meta_data to delete.", ),
     ) -> None:
         """Delete a meta_data tag from the system."""
         _ = await meta_data_tag_repo.delete(id)
