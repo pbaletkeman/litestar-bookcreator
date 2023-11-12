@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 from typing import TYPE_CHECKING
 
 from litestar import Litestar
@@ -23,6 +24,9 @@ sqlalchemy_config = SQLAlchemyAsyncConfig(
 )  # Create 'async_session' dependency.
 sqlalchemy_plugin = SQLAlchemyInitPlugin(config=sqlalchemy_config)
 
+logging.basicConfig()
+logging.getLogger("sqlalchemy.engine").setLevel(logging.INFO)
+
 
 async def on_startup() -> None:
     """Initializes the database."""
@@ -39,6 +43,7 @@ app = Litestar(
         create_examples=False,
     ),
     exception_handlers={
+
         # exceptions.ApplicationError: exceptions.exception_to_http_response,
     },
     on_startup=[on_startup],

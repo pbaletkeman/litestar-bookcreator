@@ -4,12 +4,15 @@ import uuid
 from typing import TYPE_CHECKING, Any, Optional, List
 from uuid import UUID
 
+import advanced_alchemy
+import sqlalchemy.exc
 from advanced_alchemy import SQLAlchemyAsyncRepository
 from litestar import HttpMethod
 from litestar import route
 from litestar.pagination import OffsetPagination
 from pydantic import TypeAdapter
-from sqlalchemy import ForeignKey, select
+from sqlalchemy import ForeignKey
+from sqlalchemy.dialects.postgresql import asyncpg
 from sqlalchemy.types import String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from litestar import Controller
@@ -18,12 +21,12 @@ from litestar.contrib.sqlalchemy.base import UUIDAuditBase
 from litestar.di import Provide
 from litestar.params import Parameter
 from litestar.repository.filters import LimitOffset
-from sqlalchemy import lambda_stmt
 
 if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession
 
 from shared import SlugKey, SQLAlchemyAsyncSlugRepository, BaseModel
+from logger import logger
 
 
 # The `AuditBase` class includes the same UUID` based primary key (`id`) and 2
@@ -164,15 +167,18 @@ class MetaDataTagController(Controller):
         # stmt += lambda s: s.where(Attribute.meta_data_tag_id == meta_data_tag_id)
         # results, total = await attribute_repo.list_and_count(limit_offset, statement=stmt)
 
-        results, total = await attribute_repo.list_and_count(limit_offset, meta_data_tag_id=meta_data_tag_id)
+        try:
+            results, total = await attribute_repo.list_and_count(limit_offset, meta_data_tag_id=meta_data_tag_id)
 
-        type_adapter = TypeAdapter(list[AttributeDTO])
-        return OffsetPagination[AttributeDTO](
-            items=type_adapter.validate_python(results),
-            total=total,
-            limit=limit_offset.limit,
-            offset=limit_offset.offset,
-        )
+            type_adapter = TypeAdapter(list[AttributeDTO])
+            return OffsetPagination[AttributeDTO](
+                items=type_adapter.validate_python(results),
+                total=total,
+                limit=limit_offset.limit,
+                offset=limit_offset.offset,
+            )
+        except advanced_alchemy.exceptions.RepositoryError as ex:
+            logger.error(ex)
 
     @get(path='/', tags=controller_tag)
     async def list_meta_data_items(
