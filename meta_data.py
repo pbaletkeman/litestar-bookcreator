@@ -159,9 +159,13 @@ class MetaDataTagController(Controller):
             limit_offset: LimitOffset,
     ) -> OffsetPagination[AttributeDTO]:
         """List items."""
-        stmt = lambda_stmt(lambda: select(Attribute))
-        stmt += lambda s: s.where(Attribute.meta_data_tag_id == meta_data_tag_id)
-        results, total = await attribute_repo.list_and_count(limit_offset, statement=stmt)
+        # alternative way to query tables
+        # stmt = lambda_stmt(lambda: select(Attribute))
+        # stmt += lambda s: s.where(Attribute.meta_data_tag_id == meta_data_tag_id)
+        # results, total = await attribute_repo.list_and_count(limit_offset, statement=stmt)
+
+        results, total = await attribute_repo.list_and_count(limit_offset, meta_data_tag_id=meta_data_tag_id)
+
         type_adapter = TypeAdapter(list[AttributeDTO])
         return OffsetPagination[AttributeDTO](
             items=type_adapter.validate_python(results),
