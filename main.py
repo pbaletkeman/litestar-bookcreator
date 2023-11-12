@@ -4,6 +4,7 @@ import logging
 from typing import TYPE_CHECKING
 
 from litestar import Litestar
+from litestar.config.compression import CompressionConfig
 from litestar.contrib.sqlalchemy.base import UUIDAuditBase
 from litestar.contrib.sqlalchemy.plugins import AsyncSessionConfig, SQLAlchemyAsyncConfig, SQLAlchemyInitPlugin
 from litestar.di import Provide
@@ -49,4 +50,5 @@ app = Litestar(
     on_startup=[on_startup],
     plugins=[SQLAlchemyInitPlugin(config=sqlalchemy_config)],
     dependencies={"limit_offset": Provide(provide_limit_offset_pagination, sync_to_thread=False)},
+    compression_config=CompressionConfig(backend="gzip", gzip_compress_level=9),
 )

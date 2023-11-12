@@ -3,18 +3,18 @@ from __future__ import annotations
 import random
 import re
 import string
-import unicodedata
 from typing import TYPE_CHECKING, Any
 
-from pydantic import BaseModel as _BaseModel
-from sqlalchemy.orm import Mapped, declarative_mixin, mapped_column
-from sqlalchemy.types import String
+import unicodedata
 from litestar.contrib.sqlalchemy.repository import (
     ModelT,
     SQLAlchemyAsyncRepository,
 )
 from litestar.params import Parameter
 from litestar.repository.filters import LimitOffset
+from pydantic import BaseModel as _BaseModel
+from sqlalchemy.orm import Mapped, declarative_mixin, mapped_column
+from sqlalchemy.types import String
 
 if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession

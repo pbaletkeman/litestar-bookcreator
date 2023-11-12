@@ -1,26 +1,23 @@
 from __future__ import annotations
 
-import uuid
 from typing import TYPE_CHECKING, Any, Optional, List
 from uuid import UUID
 
 import advanced_alchemy
-import sqlalchemy.exc
 from advanced_alchemy import SQLAlchemyAsyncRepository
-from litestar import HttpMethod
-from litestar import route
-from litestar.pagination import OffsetPagination
-from pydantic import TypeAdapter
-from sqlalchemy import ForeignKey
-from sqlalchemy.dialects.postgresql import asyncpg
-from sqlalchemy.types import String
-from sqlalchemy.orm import Mapped, mapped_column, relationship
 from litestar import Controller
+from litestar import HttpMethod
 from litestar import get, post, delete
+from litestar import route
 from litestar.contrib.sqlalchemy.base import UUIDAuditBase
 from litestar.di import Provide
+from litestar.pagination import OffsetPagination
 from litestar.params import Parameter
-from litestar.repository.filters import LimitOffset
+from litestar.repository.filters import LimitOffset, OrderBy
+from pydantic import TypeAdapter
+from sqlalchemy import ForeignKey
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.types import String
 
 if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession
@@ -170,7 +167,12 @@ class MetaDataTagController(Controller):
         # results, total = await attribute_repo.list_and_count(limit_offset, statement=stmt)
 
         try:
-            results, total = await attribute_repo.list_and_count(limit_offset, meta_data_tag_id=meta_data_tag_id)
+            order_by1 = OrderBy(field_name=Attribute.sort_order)
+            order_by2 = OrderBy(field_name=Attribute.name)
+            results, total = await attribute_repo.list_and_count(limit_offset,
+                                                                 order_by1,
+                                                                 order_by2,
+                                                                 meta_data_tag_id=meta_data_tag_id)
             type_adapter = TypeAdapter(list[AttributeDTO])
             return OffsetPagination[AttributeDTO](
                 items=type_adapter.validate_python(results),
@@ -184,10 +186,10 @@ class MetaDataTagController(Controller):
     @get(path='/{meta_data_tag_id:str}' + attribute_path + '/{id: int}', tags=attribute_controller_tag)
     async def get_attribute_item_details(self,
                                          meta_data_tag_id: str,
-                                         id: int,
+                                         attribute_id: int,
                                          attribute_repo: AttributeRepository, ) -> AttributeDTO:
         try:
-            obj = await attribute_repo.get_one(id=id, meta_data_tag_id=meta_data_tag_id)
+            obj = await attribute_repo.get_one(id=attribute_id, meta_data_tag_id=meta_data_tag_id)
             return AttributeDTO.model_validate(obj)
         except Exception as ex:
             logger.error(ex)
@@ -212,11 +214,11 @@ class MetaDataTagController(Controller):
     async def update_attribute_item(self,
                                     attribute_repo: AttributeRepository,
                                     data: AttributeUpdate,
-                                    meta_data_tag_id: str,
-                                    id: int) -> AttributeUpdate:
+                                    # meta_data_tag_id: str,
+                                    attribute_id: int) -> AttributeUpdate:
         try:
             _data = data.model_dump(exclude_unset=True, exclude_defaults=True)
-            _data["id"] = id
+            _data["id"] = attribute_id
             obj = await attribute_repo.update(Attribute(**_data), with_for_update=True)
             await attribute_repo.session.commit()
             return AttributeUpdate.model_validate(obj)
@@ -224,9 +226,9 @@ class MetaDataTagController(Controller):
             logger.error(ex)
 
     @delete(path='/{meta_data_tag_id:str}' + attribute_path + '/{id: int}', tags=attribute_controller_tag)
-    async def delete_attribute_item(self, attribute_repo: AttributeRepository, id: int) -> None:
+    async def delete_attribute_item(self, attribute_repo: AttributeRepository, attribute_id: int) -> None:
         try:
-            _ = await attribute_repo.delete(id)
+            _ = await attribute_repo.delete(attribute_id)
             await attribute_repo.session.commit()
         except Exception as ex:
             logger.error(ex)
@@ -239,7 +241,9 @@ class MetaDataTagController(Controller):
     ) -> OffsetPagination[MetaDataTagDTO]:
         """List items."""
         try:
-            results, total = await meta_data_tag_repo.list_and_count(limit_offset)
+            order_by1 = OrderBy(field_name=MetaDataTag.sort_order)
+            order_by2 = OrderBy(field_name=MetaDataTag.name)
+            results, total = await meta_data_tag_repo.list_and_count(limit_offset, order_by1, order_by2)
             type_adapter = TypeAdapter(list[MetaDataTagDTO])
             return OffsetPagination[MetaDataTagDTO](
                 items=type_adapter.validate_python(results),
@@ -278,12 +282,12 @@ class MetaDataTagController(Controller):
             self,
             meta_data_tag_repo: MetaDataTagRepository,
             data: MetaDataTagUpdate,
-            id: UUID = Parameter(title="MetaData.py ID", description="The meta_data to update.", ),
+            meta_data_id: UUID = Parameter(title="MetaData.py ID", description="The meta_data to update.", ),
     ) -> MetaDataTagUpdate:
         """Update an meta_data tag."""
         try:
             _data = data.model_dump(exclude_unset=True, exclude_none=True)
-            _data.update({"id": id})
+            _data.update({"id": meta_data_id})
             obj = await meta_data_tag_repo.update(MetaDataTag(**_data))
             await meta_data_tag_repo.session.commit()
             return MetaDataTagUpdate.model_validate(obj)
@@ -294,11 +298,11 @@ class MetaDataTagController(Controller):
     async def delete_meta_data_item(
             self,
             meta_data_tag_repo: MetaDataTagRepository,
-            id: UUID = Parameter(title="MetaData.py ID", description="The meta_data to delete.", ),
+            meta_data_id: UUID = Parameter(title="MetaData.py ID", description="The meta_data to delete.", ),
     ) -> None:
         """Delete a meta_data tag from the system."""
         try:
-            _ = await meta_data_tag_repo.delete(id)
+            _ = await meta_data_tag_repo.delete(meta_data_id)
             await meta_data_tag_repo.session.commit()
         except Exception as ex:
             logger.error(ex)
