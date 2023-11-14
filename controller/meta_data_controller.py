@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Optional, List
+from typing import TYPE_CHECKING
 from uuid import UUID
 
 import advanced_alchemy
@@ -9,48 +9,25 @@ from litestar import Controller
 from litestar import HttpMethod
 from litestar import get, post, delete
 from litestar import route
-from litestar.contrib.sqlalchemy.base import UUIDAuditBase
 from litestar.di import Provide
 from litestar.pagination import OffsetPagination
 from litestar.params import Parameter
 from litestar.repository.filters import LimitOffset, OrderBy
 from pydantic import TypeAdapter
-from sqlalchemy import ForeignKey
-from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlalchemy.types import String
+
+from model.meta_data import Attribute, MetaDataTag, AttributeDTO, AttributeCreate, AttributeUpdate, MetaDataTagDTO, \
+    MetaDataTagCreate, MetaDataTagUpdate
 
 if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession
 
-from shared import SlugKey, SQLAlchemyAsyncSlugRepository, BaseModel
+from shared import SQLAlchemyAsyncSlugRepository
 from logger import logger
 
 
-# The `AuditBase` class includes the same UUID` based primary key (`id`) and 2
-# additional columns: `created` and `updated`. `created` is a timestamp of when the
-# record created, and `updated` is the last time the record was modified.
-class MetaDataTag(UUIDAuditBase, SlugKey):
-    """
-    <dc:rights>Public domain in the USA.</dc:rights>
-    <meta property="role" refines="#author_0" scheme="marc:relators">aut</meta>
-    MetaDataTag can have zero or more attributes
-    """
-    __tablename__ = 'meta_data_tag'
-
-    is_empty_tag: Mapped[bool | None] = mapped_column(default=False)
-    sort_order: Mapped[int] = mapped_column(nullable=False, default=0)
-    name: Mapped[str] = mapped_column(String(length=30), nullable=False)
-    tag: Mapped[str] = mapped_column(String(length=30), nullable=False)
-    description: Mapped[str | None]
-
-    attributes: Mapped[List["Attribute"]] = relationship(back_populates="item_tag")
-
-    def __init__(self, **kw: Any):
-        super().__init__(**kw)
-        if self.is_empty_tag is None:
-            self.is_empty_tag = False
-        if self.sort_order is None:
-            self.sort_order = 0
+class AttributeRepository(SQLAlchemyAsyncRepository[Attribute]):
+    """Blog Post repository."""
+    model_type = Attribute
 
 
 class MetaDataTagRepository(SQLAlchemyAsyncSlugRepository[MetaDataTag]):
@@ -59,30 +36,12 @@ class MetaDataTagRepository(SQLAlchemyAsyncSlugRepository[MetaDataTag]):
     model_type = MetaDataTag
 
 
-class MetaDataTagDTO(BaseModel):
-    id: UUID | None
-    sort_order: Optional[int] = 0
-    slug: str
-    name: str
-    tag: str
-    is_empty_tag: Optional[bool] = False
-    description: Optional[str] = None
-
-
-class MetaDataTagCreate(BaseModel):
-    name: str
-    tag: str
-    is_empty_tag: Optional[bool] = False
-    sort_order: Optional[int] = 0
-    description: Optional[str] = None
-
-
-class MetaDataTagUpdate(BaseModel):
-    sort_order: Optional[int] = 0
-    name: str
-    tag: str
-    is_empty_tag: Optional[bool] = False
-    description: Optional[str] = None
+# we can optionally override the default `select` used for the repository to pass in
+# specific SQL options such as join details
+async def provide_attribute_repo(db_session: AsyncSession) -> AttributeRepository:
+    """This provides a simple example demonstrating how to override the join options
+    for the repository."""
+    return AttributeRepository(session=db_session)
 
 
 # we can optionally override the default `select` used for the repository to pass in
@@ -91,57 +50,6 @@ async def provide_meta_data_tag_repo(db_session: AsyncSession) -> MetaDataTagRep
     """This provides a simple example demonstrating how to override the join options
     for the repository."""
     return MetaDataTagRepository(session=db_session)
-
-
-class Attribute(UUIDAuditBase):
-    __tablename__ = "attribute"
-
-    id: Mapped[int] = mapped_column(primary_key=True)
-    sort_order: Mapped[int | None] = mapped_column(nullable=False, default=0)  # = mapped_column("sortOrder")
-    name: Mapped[str] = mapped_column(String(length=30), nullable=False)
-
-    meta_data_tag_id: Mapped[UUID] = mapped_column(ForeignKey("meta_data_tag.id"))
-    item_tag: Mapped["MetaDataTag"] = relationship(back_populates="attributes", lazy="selectin")
-
-    def __init__(self, **kw: Any):
-        super().__init__(**kw)
-        if self.sort_order is None:
-            self.sort_order = 0
-
-
-class AttributeRepository(SQLAlchemyAsyncRepository[Attribute]):
-    """Blog Post repository."""
-    model_type = Attribute
-
-
-class AttributeDTO(BaseModel):
-    id: int | None
-    sort_order: Optional[int] = 0
-    name: str
-    description: Optional[str] = None
-    meta_data_tag_id: UUID
-
-
-class AttributeCreate(BaseModel):
-    name: str
-    sort_order: Optional[int] = 0
-    description: Optional[str] = None
-    # meta_data_tag_id: UUID
-
-
-class AttributeUpdate(BaseModel):
-    name: str
-    sort_order: Optional[int] = 0
-    description: Optional[str] = None
-    # meta_data_tag_id: UUID
-
-
-# we can optionally override the default `select` used for the repository to pass in
-# specific SQL options such as join details
-async def provide_attribute_repo(db_session: AsyncSession) -> AttributeRepository:
-    """This provides a simple example demonstrating how to override the join options
-    for the repository."""
-    return AttributeRepository(session=db_session)
 
 
 class MetaDataTagController(Controller):

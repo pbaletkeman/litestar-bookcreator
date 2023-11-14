@@ -10,11 +10,13 @@ from litestar.contrib.sqlalchemy.plugins import AsyncSessionConfig, SQLAlchemyAs
 from litestar.di import Provide
 from litestar.openapi import OpenAPIConfig
 
+from controller.meta_data_controller import MetaDataTagController
+
 if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession
 
 from shared import provide_limit_offset_pagination
-from meta_data import MetaDataTagController
+# from meta_data import MetaDataTagController
 
 session_config = AsyncSessionConfig(expire_on_commit=False)
 sqlalchemy_config = SQLAlchemyAsyncConfig(
