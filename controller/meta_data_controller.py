@@ -54,8 +54,8 @@ async def provide_meta_data_tag_repo(db_session: AsyncSession) -> MetaDataTagRep
 
 class MetaDataTagController(Controller):
     path = '/meta-data-tag'
-    meta_data_controller_tag = ['Meta Data']
-    attribute_controller_tag = ['Attribute']
+    meta_data_controller_tag = ['Meta Data - CRUD']
+    attribute_controller_tag = ['Attribute - CRUD']
     attribute_path = '/attribute'
 
     dependencies = {"meta_data_tag_repo": Provide(provide_meta_data_tag_repo),
