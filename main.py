@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+import sys
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -18,6 +19,8 @@ from controller.meta_data_controller import MetaDataTagController
 
 if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession
+
+from logger import logger
 
 from shared import provide_limit_offset_pagination
 
@@ -38,9 +41,12 @@ logging.getLogger("sqlalchemy.engine").setLevel(logging.INFO)
 
 async def on_startup() -> None:
     """Initializes the database."""
-    async with sqlalchemy_config.get_engine().begin() as conn:
-        await conn.run_sync(UUIDAuditBase.metadata.create_all)
-
+    try:
+        async with sqlalchemy_config.get_engine().begin() as conn:
+            await conn.run_sync(UUIDAuditBase.metadata.create_all)
+    except Exception as ex:
+        logger.error('db connection issue ' + str(ex))
+        sys.exit(1)
 
 @get(path="/", sync_to_thread=False)
 def index(name: str) -> Template:
