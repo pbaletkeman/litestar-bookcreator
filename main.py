@@ -48,6 +48,7 @@ async def on_startup() -> None:
         logger.error('db connection issue ' + str(ex))
         sys.exit(1)
 
+
 @get(path="/", sync_to_thread=False)
 def index(name: str) -> Template:
     return Template(template_name="hello.html.mako", context={"name": name})
@@ -59,7 +60,7 @@ def index_test() -> Template:
 
 
 app = Litestar(
-    route_handlers=[MetaDataTagController,index,index_test],
+    route_handlers=[MetaDataTagController, index, index_test],
     openapi_config=OpenAPIConfig(
         title="My API", version="1.0.0",
         root_schema_site="elements",  # swagger, elements, redoc

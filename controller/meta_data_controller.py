@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING
 from uuid import UUID
 
 import advanced_alchemy
+import requests
 from advanced_alchemy import SQLAlchemyAsyncRepository
 from litestar import Controller
 from litestar import HttpMethod
@@ -123,10 +124,10 @@ class MetaDataTagController(Controller):
                                     attribute_repo: AttributeRepository,
                                     data: AttributeUpdate,
                                     # meta_data_tag_id: str,
-                                    attribute_id: int) -> AttributeUpdate:
+                                    id: int) -> AttributeUpdate:
         try:
             _data = data.model_dump(exclude_unset=True, exclude_defaults=True)
-            _data["id"] = attribute_id
+            _data["id"] = id
             obj = await attribute_repo.update(Attribute(**_data), with_for_update=True)
             await attribute_repo.session.commit()
             return AttributeUpdate.model_validate(obj)
@@ -190,12 +191,12 @@ class MetaDataTagController(Controller):
             self,
             meta_data_tag_repo: MetaDataTagRepository,
             data: MetaDataTagUpdate,
-            meta_data_id: UUID = Parameter(title="MetaData.py ID", description="The meta_data to update.", ),
+            id: UUID = Parameter(title="MetaData.py ID", description="The meta_data to update.", ),
     ) -> MetaDataTagUpdate:
         """Update an meta_data tag."""
         try:
             _data = data.model_dump(exclude_unset=True, exclude_none=True)
-            _data.update({"id": meta_data_id})
+            _data.update({"id": id})
             obj = await meta_data_tag_repo.update(MetaDataTag(**_data))
             await meta_data_tag_repo.session.commit()
             return MetaDataTagUpdate.model_validate(obj)

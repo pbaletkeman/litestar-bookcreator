@@ -85,6 +85,7 @@ class Attribute(UUIDAuditBase):
     id: Mapped[int] = mapped_column(primary_key=True)
     sort_order: Mapped[int | None] = mapped_column(nullable=False, default=0)  # = mapped_column("sortOrder")
     name: Mapped[str] = mapped_column(String(length=30), nullable=False)
+    description: Mapped[str] = mapped_column(String(), nullable=True)
 
     meta_data_tag_id: Mapped[UUID] = mapped_column(ForeignKey("meta_data_tag.id"))
     item_tag: Mapped["MetaDataTag"] = relationship(back_populates="attributes", lazy="selectin")
