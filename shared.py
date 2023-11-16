@@ -56,7 +56,7 @@ class SlugKey:
     """Slug unique Field Model Mixin."""
 
     __abstract__ = True
-    slug: Mapped[str] = mapped_column(String(length=100), nullable=False, unique=True, sort_order=-9)
+    slug: Mapped[str] = mapped_column(String(length=100), nullable=False, unique=True, sort_order=99)
 
 
 # this class can be re-used with any model that has the `SlugKey` Mixin
