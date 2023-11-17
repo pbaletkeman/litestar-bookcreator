@@ -97,9 +97,12 @@ class MetaDataTagController(Controller):
     @get(path='/{meta_data_tag_id: int}' + attribute_path + '/details/{attribute_id: int}',
          tags=attribute_controller_tag)
     async def get_attribute_item_details(self,
-                                         meta_data_tag_id: int,
-                                         attribute_id: int,
-                                         attribute_repo: AttributeRepository, ) -> MetaDataAttributeDefDTO:
+                                         attribute_repo: AttributeRepository,
+                                         meta_data_tag_id: int = Parameter(title="Meta Data Tag ID",
+                                                                           description="The meta_data to update.", ),
+                                         attribute_id: int = Parameter(title="Meta Data Tag ID",
+                                                                       description="The meta_data to update.", ),
+                                         ) -> MetaDataAttributeDefDTO:
         try:
             obj = await attribute_repo.get_one(id=attribute_id, meta_data_tag_id=meta_data_tag_id)
             return MetaDataAttributeDefDTO.model_validate(obj)
@@ -108,9 +111,11 @@ class MetaDataTagController(Controller):
 
     @post(path='/{meta_data_tag_id: int}' + attribute_path, tags=attribute_controller_tag)
     async def create_attribute_item(self,
-                                    meta_data_tag_id: int,
                                     attribute_repo: AttributeRepository,
-                                    data: MetaDataAttributeDefCreate, ) -> MetaDataAttributeDefDTO:
+                                    data: MetaDataAttributeDefCreate,
+                                    meta_data_tag_id: int = Parameter(title="Meta Data Tag ID",
+                                                                      description="The meta_data to update.", ),
+                                    ) -> MetaDataAttributeDefDTO:
         try:
             _data = data.model_dump(exclude_unset=True, by_alias=False, exclude_defaults=True)
             _data["meta_data_tag_id"] = meta_data_tag_id
@@ -126,8 +131,11 @@ class MetaDataTagController(Controller):
     async def update_attribute_item(self,
                                     attribute_repo: AttributeRepository,
                                     data: MetaDataAttributeDefUpdate,
-                                    meta_data_tag_id: int,
-                                    attribute_id: int) -> MetaDataAttributeDefUpdate:
+                                    meta_data_tag_id: int = Parameter(title="Meta Data Tag ID",
+                                                                      description="The meta_data to update.", ),
+                                    attribute_id: int = Parameter(title="Meta Data Tag ID",
+                                                                  description="The meta_data to update.", ),
+                                    ) -> MetaDataAttributeDefUpdate:
         try:
             _data = data.model_dump(exclude_unset=True, exclude_defaults=True)
             _data["id"] = attribute_id
@@ -138,7 +146,7 @@ class MetaDataTagController(Controller):
                 await attribute_repo.session.commit()
                 return MetaDataAttributeDefUpdate.model_validate(obj)
             else:
-                raise HTTPException(detail='reocrd not found', status_code=status_codes.HTTP_404_NOT_FOUND)
+                raise HTTPException(detail='record not found', status_code=status_codes.HTTP_404_NOT_FOUND)
         except Exception as ex:
             logger.error(ex)
             raise HTTPException(detail=str(ex), status_code=status_codes.HTTP_404_NOT_FOUND)
@@ -146,8 +154,11 @@ class MetaDataTagController(Controller):
     @delete(path='/{meta_data_tag_id: int}' + attribute_path + '/{attribute_id: int}', tags=attribute_controller_tag)
     async def delete_attribute_item(self,
                                     attribute_repo: AttributeRepository,
-                                    meta_data_tag_id: int,
-                                    attribute_id: int) -> None:
+                                    meta_data_tag_id: int = Parameter(title="Meta Data Tag ID",
+                                                                      description="The meta_data to update.", ),
+                                    attribute_id: int = Parameter(title="Meta Data Tag ID",
+                                                                  description="The meta_data to update.", ),
+                                    ) -> None:
         try:
             # verify that the record is there before trying operation
             rec = await attribute_repo.get_one(id=attribute_id, meta_data_tag_id=meta_data_tag_id)
@@ -155,7 +166,7 @@ class MetaDataTagController(Controller):
                 _ = await attribute_repo.delete(attribute_id)
                 await attribute_repo.session.commit()
             else:
-                raise HTTPException(detail='reocrd not found', status_code=status_codes.HTTP_404_NOT_FOUND)
+                raise HTTPException(detail='record not found', status_code=status_codes.HTTP_404_NOT_FOUND)
         except Exception as ex:
             raise HTTPException(detail=str(ex), status_code=status_codes.HTTP_404_NOT_FOUND)
 
@@ -181,8 +192,11 @@ class MetaDataTagController(Controller):
             raise HTTPException(detail=str(ex), status_code=status_codes.HTTP_404_NOT_FOUND)
 
     @get(path="/details/{meta_data_tag_id: int}", tags=meta_data_controller_tag)
-    async def get_meta_data_details(self, meta_data_tag_id: int,
-                                    meta_data_tag_repo: MetaDataTagRepository, ) -> MetaDataTagDefDTO:
+    async def get_meta_data_details(self,
+                                    meta_data_tag_repo: MetaDataTagRepository,
+                                    meta_data_tag_id: int = Parameter(title="Meta Data Tag ID",
+                                                                      description="The meta_data to update.", ),
+                                    ) -> MetaDataTagDefDTO:
         """Interact with SQLAlchemy engine and session."""
         try:
             obj = await meta_data_tag_repo.get_one(id=meta_data_tag_id)
@@ -210,7 +224,7 @@ class MetaDataTagController(Controller):
             self,
             meta_data_tag_repo: MetaDataTagRepository,
             data: MetaDataTagDefUpdate,
-            meta_data_tag_id: int = Parameter(title="MetaData.py ID", description="The meta_data to update.", ),
+            meta_data_tag_id: int = Parameter(title="Meta Data Tag ID", description="The meta_data to update.", ),
     ) -> MetaDataTagDefUpdate:
         """Update an meta_data tag."""
         try:
@@ -226,9 +240,11 @@ class MetaDataTagController(Controller):
     async def delete_meta_data_item(
             self,
             meta_data_tag_repo: MetaDataTagRepository,
-            meta_data_tag_id: int = Parameter(title="MetaData.py ID", description="The meta_data to delete.", ),
+            meta_data_tag_id: int = Parameter(title="Meta Data Tag ID",
+                                              description="The id meta data tag to delete.", ),
     ) -> None:
-        """Delete a meta_data tag from the system."""
+        """## Delete
+         a meta_data tag from the system."""
         try:
             _ = await meta_data_tag_repo.delete(meta_data_tag_id)
             await meta_data_tag_repo.session.commit()

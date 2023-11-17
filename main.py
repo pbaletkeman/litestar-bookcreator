@@ -66,6 +66,7 @@ app = Litestar(
         root_schema_site="elements",  # swagger, elements, redoc
         path="/docs",
         create_examples=False,
+        use_handler_docstrings=True,
     ),
     exception_handlers={
 
