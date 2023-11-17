@@ -250,3 +250,4 @@ class MetaDataTagController(Controller):
             await meta_data_tag_repo.session.commit()
         except Exception as ex:
             raise HTTPException(detail=str(ex), status_code=status_codes.HTTP_404_NOT_FOUND)
+
