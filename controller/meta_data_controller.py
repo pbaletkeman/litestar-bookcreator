@@ -16,6 +16,9 @@ from litestar.params import Parameter
 from litestar.repository.filters import LimitOffset, OrderBy
 from pydantic import TypeAdapter
 
+from sqlalchemy import ForeignKey, select
+from sqlalchemy.orm import Mapped, mapped_column, relationship, selectinload
+
 from model.meta_data_attribute import MetaDataAttributeDef, MetaDataAttributeDefDTO, MetaDataAttributeDefCreate, \
     MetaDataAttributeDefUpdate
 from model.meta_data_tag import MetaDataTagDef, MetaDataTagDefDTO, MetaDataTagDefCreate, MetaDataTagDefUpdate
@@ -66,7 +69,9 @@ async def provide_meta_data_tag_repo(db_session: AsyncSession) -> MetaDataTagRep
 async def provide_meta_data_def_repo(db_session: AsyncSession) -> MetaDataDefRepository:
     """This provides a simple example demonstrating how to override the join options
     for the repository."""
-    return MetaDataDefRepository(session=db_session)
+    return MetaDataDefRepository(
+        session=db_session
+    )
 
 
 class MetaDataTagController(Controller):
@@ -253,14 +258,14 @@ class MetaDataTagController(Controller):
     @get(path=meta_data_path, tags=meta_data_controller_tag)
     async def list_meta_data_items(
             self,
-            meta_data_repo: MetaDataDefRepository,
+            meta_data_def_repo: MetaDataDefRepository,
             limit_offset: LimitOffset,
     ) -> OffsetPagination[MetaDataDefDTO]:
         """List items."""
         try:
-            order_by1 = OrderBy(field_name=MetaDataDef.sort_order)
-            order_by2 = OrderBy(field_name=MetaDataDef.name)
-            results, total = await meta_data_repo.list_and_count(limit_offset, order_by1, order_by2)
+            order_by1 = OrderBy(field_name=MetaDataDef.meta_data_tag_id)
+            order_by2 = OrderBy(field_name=MetaDataDef.attribute_id)
+            results, total = await meta_data_def_repo.list_and_count(limit_offset, order_by1, order_by2)
             type_adapter = TypeAdapter(list[MetaDataDefDTO])
             return OffsetPagination[MetaDataDefDTO](
                 items=type_adapter.validate_python(results),
@@ -273,27 +278,39 @@ class MetaDataTagController(Controller):
 
     @get(path='/details/' + meta_data_path + "/{meta_data_id: int}", tags=meta_data_controller_tag)
     async def get_meta_data_details(self,
-                                        meta_data_repo: MetaDataDefRepository,
-                                        meta_data_id: int = Parameter(title="Meta Data Tag ID",
-                                                                          description="The meta_data to update.", ),
-                                        ) -> MetaDataDefDTO:
+                                    meta_data_def_repo: MetaDataDefRepository,
+                                    meta_data_id: int = Parameter(title="Meta Data Tag ID",
+                                                                  description="The meta_data to update.", ),
+                                    ) -> MetaDataDefDTO:
         """Interact with SQLAlchemy engine and session."""
         try:
-            obj = await meta_data_repo.get_one(id=meta_data_id)
+            obj = await meta_data_def_repo.get_one(id=meta_data_id)
             return MetaDataDefDTO.model_validate(obj)
         except Exception as ex:
             raise HTTPException(detail=str(ex), status_code=status_codes.HTTP_404_NOT_FOUND)
 
     @post(path=meta_data_path, tags=meta_data_controller_tag)
-    async def create_meta_data_item(self, meta_data_repo: MetaDataDefRepository,
-                                        data: MetaDataDefCreate, ) -> MetaDataDefDTO:
+    async def create_meta_data_item(self, meta_data_def_repo: MetaDataDefRepository,
+                                    data: MetaDataDefCreate, ) -> list[MetaDataDefDTO]:
         """Create a new meta_data tag."""
+        _data = data.model_dump(exclude_unset=True, by_alias=False, exclude_none=True)
         try:
-            _data = data.model_dump(exclude_unset=True, by_alias=False, exclude_none=True)
-            # _data["slug"] = await meta_data_tag_repo.get_available_slug(_data["name"])
-            obj = await meta_data_repo.add(MetaDataDef(**_data))
-            await meta_data_repo.session.commit()
-            return MetaDataDefDTO.model_validate(obj)
+            if 'attributes' in _data:
+                records = []
+                attributes = _data.get('attributes')
+                del _data['attributes']
+                for att in attributes:
+                    temp_item = _data.copy()
+                    temp_item["attribute_id"] = att.get("id")
+                    temp_item["attribute_value"] = att.get("value")
+                    records.append(MetaDataDef(**temp_item))
+                await meta_data_def_repo.add_many(records)
+                await meta_data_def_repo.session.commit()
+                return [MetaDataDefDTO.model_validate(x) for x in records]
+            else:
+                obj = await meta_data_def_repo.add(MetaDataDef(**_data))
+                await meta_data_def_repo.session.commit()
+                return [MetaDataDefDTO.model_validate(obj)]
         except Exception as ex:
             raise HTTPException(detail=str(ex), status_code=status_codes.HTTP_404_NOT_FOUND)
 
@@ -302,7 +319,7 @@ class MetaDataTagController(Controller):
            tags=meta_data_controller_tag)
     async def update_meta_data_item(
             self,
-            meta_data_repo: MetaDataDefRepository,
+            meta_data_def_repo: MetaDataDefRepository,
             data: MetaDataDefUpdate,
             meta_data_id: int = Parameter(title="Meta Data Tag ID", description="The meta_data to update.", ),
     ) -> MetaDataDefUpdate:
@@ -310,8 +327,8 @@ class MetaDataTagController(Controller):
         try:
             _data = data.model_dump(exclude_unset=True, exclude_none=True)
             _data.update({"id": meta_data_id})
-            obj = await meta_data_repo.update(MetaDataDef(**_data))
-            await meta_data_repo.session.commit()
+            obj = await meta_data_def_repo.update(MetaDataDef(**_data))
+            await meta_data_def_repo.session.commit()
             return MetaDataDefUpdate.model_validate(obj)
         except Exception as ex:
             raise HTTPException(detail=str(ex), status_code=status_codes.HTTP_404_NOT_FOUND)
@@ -319,14 +336,14 @@ class MetaDataTagController(Controller):
     @delete(path=meta_data_path + "/{meta_data_id:int}", tags=meta_data_controller_tag)
     async def delete_meta_data_item(
             self,
-            meta_data_repo: MetaDataDefRepository,
+            meta_data_def_repo: MetaDataDefRepository,
             meta_data_id: int = Parameter(title="Meta Data Tag ID",
-                                              description="The id meta data tag to delete.", ),
+                                          description="The id meta data tag to delete.", ),
     ) -> None:
         """## Delete
          a meta_data tag from the system."""
         try:
-            _ = await meta_data_repo.delete(meta_data_id)
-            await meta_data_repo.session.commit()
+            _ = await meta_data_def_repo.delete(meta_data_id)
+            await meta_data_def_repo.session.commit()
         except Exception as ex:
             raise HTTPException(detail=str(ex), status_code=status_codes.HTTP_404_NOT_FOUND)
