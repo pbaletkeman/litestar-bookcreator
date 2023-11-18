@@ -249,3 +249,84 @@ class MetaDataTagController(Controller):
             await meta_data_tag_repo.session.commit()
         except Exception as ex:
             raise HTTPException(detail=str(ex), status_code=status_codes.HTTP_404_NOT_FOUND)
+
+    @get(path=meta_data_path, tags=meta_data_controller_tag)
+    async def list_meta_data_items(
+            self,
+            meta_data_repo: MetaDataDefRepository,
+            limit_offset: LimitOffset,
+    ) -> OffsetPagination[MetaDataDefDTO]:
+        """List items."""
+        try:
+            order_by1 = OrderBy(field_name=MetaDataDef.sort_order)
+            order_by2 = OrderBy(field_name=MetaDataDef.name)
+            results, total = await meta_data_repo.list_and_count(limit_offset, order_by1, order_by2)
+            type_adapter = TypeAdapter(list[MetaDataDefDTO])
+            return OffsetPagination[MetaDataDefDTO](
+                items=type_adapter.validate_python(results),
+                total=total,
+                limit=limit_offset.limit,
+                offset=limit_offset.offset,
+            )
+        except Exception as ex:
+            raise HTTPException(detail=str(ex), status_code=status_codes.HTTP_404_NOT_FOUND)
+
+    @get(path='/details/' + meta_data_path + "/{meta_data_id: int}", tags=meta_data_controller_tag)
+    async def get_meta_data_details(self,
+                                        meta_data_repo: MetaDataDefRepository,
+                                        meta_data_id: int = Parameter(title="Meta Data Tag ID",
+                                                                          description="The meta_data to update.", ),
+                                        ) -> MetaDataDefDTO:
+        """Interact with SQLAlchemy engine and session."""
+        try:
+            obj = await meta_data_repo.get_one(id=meta_data_id)
+            return MetaDataDefDTO.model_validate(obj)
+        except Exception as ex:
+            raise HTTPException(detail=str(ex), status_code=status_codes.HTTP_404_NOT_FOUND)
+
+    @post(path=meta_data_path, tags=meta_data_controller_tag)
+    async def create_meta_data_item(self, meta_data_repo: MetaDataDefRepository,
+                                        data: MetaDataDefCreate, ) -> MetaDataDefDTO:
+        """Create a new meta_data tag."""
+        try:
+            _data = data.model_dump(exclude_unset=True, by_alias=False, exclude_none=True)
+            # _data["slug"] = await meta_data_tag_repo.get_available_slug(_data["name"])
+            obj = await meta_data_repo.add(MetaDataDef(**_data))
+            await meta_data_repo.session.commit()
+            return MetaDataDefDTO.model_validate(obj)
+        except Exception as ex:
+            raise HTTPException(detail=str(ex), status_code=status_codes.HTTP_404_NOT_FOUND)
+
+    @route(path=meta_data_path + "/{meta_data_id:int}",
+           http_method=[HttpMethod.PUT, HttpMethod.PATCH],
+           tags=meta_data_controller_tag)
+    async def update_meta_data_item(
+            self,
+            meta_data_repo: MetaDataDefRepository,
+            data: MetaDataDefUpdate,
+            meta_data_id: int = Parameter(title="Meta Data Tag ID", description="The meta_data to update.", ),
+    ) -> MetaDataDefUpdate:
+        """Update an meta_data tag."""
+        try:
+            _data = data.model_dump(exclude_unset=True, exclude_none=True)
+            _data.update({"id": meta_data_id})
+            obj = await meta_data_repo.update(MetaDataDef(**_data))
+            await meta_data_repo.session.commit()
+            return MetaDataDefUpdate.model_validate(obj)
+        except Exception as ex:
+            raise HTTPException(detail=str(ex), status_code=status_codes.HTTP_404_NOT_FOUND)
+
+    @delete(path=meta_data_path + "/{meta_data_id:int}", tags=meta_data_controller_tag)
+    async def delete_meta_data_item(
+            self,
+            meta_data_repo: MetaDataDefRepository,
+            meta_data_id: int = Parameter(title="Meta Data Tag ID",
+                                              description="The id meta data tag to delete.", ),
+    ) -> None:
+        """## Delete
+         a meta_data tag from the system."""
+        try:
+            _ = await meta_data_repo.delete(meta_data_id)
+            await meta_data_repo.session.commit()
+        except Exception as ex:
+            raise HTTPException(detail=str(ex), status_code=status_codes.HTTP_404_NOT_FOUND)
