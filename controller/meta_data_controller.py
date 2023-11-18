@@ -16,14 +16,13 @@ from litestar.params import Parameter
 from litestar.repository.filters import LimitOffset, OrderBy
 from pydantic import TypeAdapter
 
-from model.meta_data import MetaDataAttributeDef, MetaDataTagDef, MetaDataAttributeDefDTO, MetaDataAttributeDefCreate, \
-    MetaDataAttributeDefUpdate, MetaDataTagDefDTO, \
-    MetaDataTagDefCreate, MetaDataTagDefUpdate
+from model.meta_data_attribute import MetaDataAttributeDef, MetaDataAttributeDefDTO, MetaDataAttributeDefCreate, \
+    MetaDataAttributeDefUpdate
+from model.meta_data_tag import MetaDataTagDef, MetaDataTagDefDTO, MetaDataTagDefCreate, MetaDataTagDefUpdate
 
 if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession
 
-# from shared import SQLAlchemyAsyncSlugRepository
 from logger import logger
 
 
