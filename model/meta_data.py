@@ -51,13 +51,6 @@ class MetaDataDefCreate(BaseModel):
     is_empty_tag: bool | None = False
     attributes: list[MetaDataAttributeTag] | None
 
-
-class MetaDataDefUpdate(BaseModel):
-    meta_data_tag_id: int
-    tag_value: str
-    is_empty_tag: bool | None = False
-    attributes: list[MetaDataAttributeTag] | None
-
 """
 {
   "meta_data_tag_id": 3,

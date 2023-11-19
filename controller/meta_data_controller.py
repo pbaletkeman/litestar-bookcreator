@@ -16,13 +16,9 @@ from litestar.params import Parameter
 from litestar.repository.filters import LimitOffset, OrderBy
 from pydantic import TypeAdapter
 
-from sqlalchemy import ForeignKey, select
-from sqlalchemy.orm import Mapped, mapped_column, relationship, selectinload
-
-from model.meta_data_attribute import MetaDataAttributeDef, MetaDataAttributeDefDTO, MetaDataAttributeDefCreate, \
-    MetaDataAttributeDefUpdate
-from model.meta_data_tag import MetaDataTagDef, MetaDataTagDefDTO, MetaDataTagDefCreate, MetaDataTagDefUpdate
-from model.meta_data import MetaDataDef, MetaDataDefDTO, MetaDataDefCreate, MetaDataDefUpdate
+from model.meta_data_attribute import MetaDataAttributeDef, MetaDataAttributeDefDTO, MetaDataAttributeDefCreate
+from model.meta_data_tag import MetaDataTagDef, MetaDataTagDefDTO, MetaDataTagDefCreate
+from model.meta_data import MetaDataDef, MetaDataDefDTO, MetaDataDefCreate
 
 if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession
@@ -146,17 +142,17 @@ class MetaDataTagController(Controller):
            tags=attribute_controller_tag)
     async def update_attribute_item(self,
                                     attribute_repo: AttributeRepository,
-                                    data: MetaDataAttributeDefUpdate,
+                                    data: MetaDataAttributeDefCreate,
                                     attribute_id: int = Parameter(title="Meta Data Tag ID",
                                                                   description="The meta_data to update.", ),
-                                    ) -> MetaDataAttributeDefUpdate:
+                                    ) -> MetaDataAttributeDefCreate:
         try:
             _data = data.model_dump(exclude_unset=True, exclude_defaults=True)
             _data["id"] = attribute_id
             # verify that the record is there before trying operation
             obj = await attribute_repo.update(MetaDataAttributeDef(**_data), with_for_update=True)
             await attribute_repo.session.commit()
-            return MetaDataAttributeDefUpdate.model_validate(obj)
+            return MetaDataAttributeDefCreate.model_validate(obj)
         except Exception as ex:
             logger.error(ex)
             raise HTTPException(detail=str(ex), status_code=status_codes.HTTP_404_NOT_FOUND)
@@ -227,16 +223,16 @@ class MetaDataTagController(Controller):
     async def update_meta_data_tag_item(
             self,
             meta_data_tag_repo: MetaDataTagRepository,
-            data: MetaDataTagDefUpdate,
+            data: MetaDataTagDefCreate,
             meta_data_tag_id: int = Parameter(title="Meta Data Tag ID", description="The meta_data to update.", ),
-    ) -> MetaDataTagDefUpdate:
+    ) -> MetaDataTagDefCreate:
         """Update an meta_data tag."""
         try:
             _data = data.model_dump(exclude_unset=True, exclude_none=True)
             _data.update({"id": meta_data_tag_id})
             obj = await meta_data_tag_repo.update(MetaDataTagDef(**_data))
             await meta_data_tag_repo.session.commit()
-            return MetaDataTagDefUpdate.model_validate(obj)
+            return MetaDataTagDefCreate.model_validate(obj)
         except Exception as ex:
             raise HTTPException(detail=str(ex), status_code=status_codes.HTTP_404_NOT_FOUND)
 
@@ -320,16 +316,16 @@ class MetaDataTagController(Controller):
     async def update_meta_data_item(
             self,
             meta_data_def_repo: MetaDataDefRepository,
-            data: MetaDataDefUpdate,
+            data: MetaDataDefCreate,
             meta_data_id: int = Parameter(title="Meta Data Tag ID", description="The meta_data to update.", ),
-    ) -> MetaDataDefUpdate:
+    ) -> MetaDataDefCreate:
         """Update an meta_data tag."""
         try:
             _data = data.model_dump(exclude_unset=True, exclude_none=True)
             _data.update({"id": meta_data_id})
             obj = await meta_data_def_repo.update(MetaDataDef(**_data))
             await meta_data_def_repo.session.commit()
-            return MetaDataDefUpdate.model_validate(obj)
+            return MetaDataDefCreate.model_validate(obj)
         except Exception as ex:
             raise HTTPException(detail=str(ex), status_code=status_codes.HTTP_404_NOT_FOUND)
 

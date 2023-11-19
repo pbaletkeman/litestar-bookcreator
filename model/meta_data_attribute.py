@@ -55,14 +55,6 @@ class MetaDataAttributeDefCreate(BaseModel):
     description: Optional[str] = None
 
 
-class MetaDataAttributeDefUpdate(BaseModel):
-    name: str
-    sort_order: Optional[int] = 0
-    place_holder: Optional[str] = None
-    tool_tip: Optional[str] = None
-    description: Optional[str] = None
-
-
 class MetaDataAttributeTag(BaseModel):
     id: int
     value: str

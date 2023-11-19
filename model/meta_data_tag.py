@@ -53,11 +53,3 @@ class MetaDataTagDefCreate(BaseModel):
     tool_tip: Optional[str] = None
     description: Optional[str] = None
 
-
-class MetaDataTagDefUpdate(BaseModel):
-    sort_order: Optional[int] = 0
-    name: str
-    tag: str
-    place_holder: Optional[str] = None
-    tool_tip: Optional[str] = None
-    description: Optional[str] = None
