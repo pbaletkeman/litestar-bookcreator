@@ -12,7 +12,7 @@ if TYPE_CHECKING:
 from shared import BaseModel
 
 
-class MetaDataTagDef(BigIntAuditBase):
+class MetaDataTag(BigIntAuditBase):
     """
     <dc:rights>Public domain in the USA.</dc:rights>
     <meta name="cover" content="id-3687803259850171647"/>
@@ -20,7 +20,7 @@ class MetaDataTagDef(BigIntAuditBase):
     meta_data_tag = dc:rights
     meta_data_tag = meta
     """
-    __tablename__ = 'meta_data_tag_def'
+    __tablename__ = 'meta_data_tag'
     id: Mapped[int] = mapped_column(primary_key=True, name="meta_data_tag_id", sort_order=-10)
     sort_order: Mapped[int] = mapped_column(nullable=False, default=0, sort_order=1)
     name: Mapped[str] = mapped_column(String(length=30), nullable=False, sort_order=2)
@@ -35,7 +35,7 @@ class MetaDataTagDef(BigIntAuditBase):
             self.sort_order = 0
 
 
-class MetaDataTagDefDTO(BaseModel):
+class MetaDataTagDTO(BaseModel):
     id: Optional[int]
     sort_order: Optional[int] = 0
     name: str
@@ -45,7 +45,7 @@ class MetaDataTagDefDTO(BaseModel):
     description: Optional[str] = None
 
 
-class MetaDataTagDefCreate(BaseModel):
+class MetaDataTagCreate(BaseModel):
     name: str
     tag: str
     sort_order: Optional[int] = 0
