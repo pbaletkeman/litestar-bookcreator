@@ -16,11 +16,7 @@ from litestar.params import Parameter
 from litestar.repository.filters import LimitOffset, OrderBy
 from pydantic import TypeAdapter
 
-from model.meta_data_attribute import MetaDataAttribute, MetaDataAttributeDTO, MetaDataAttributeCreate
 from model.meta_data_tag import MetaDataTag, MetaDataTagDTO, MetaDataTagCreate
-from model.meta_data_attribute_value import (MetaDataAttributeValue, MetaDataAttributeValueDTO,
-                                             MetaDataAttributeValueCreate)
-from model.meta_data_tag_value import MetaDataTagValue, MetaDataTagValueDTO
 
 if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession
@@ -42,129 +38,15 @@ async def provide_meta_data_tag_repo(db_session: AsyncSession) -> MetaDataTagRep
     return MetaDataTagRepository(session=db_session)
 
 
-class AttributeRepository(SQLAlchemyAsyncRepository[MetaDataAttribute]):
-    """Attribute repository."""
-    model_type = MetaDataAttribute
-
-
-async def provide_attribute_repo(db_session: AsyncSession) -> AttributeRepository:
-    """This provides a simple example demonstrating how to override the join options
-    for the repository."""
-    return AttributeRepository(
-        session=db_session
-    )
-
-
-class MetaDataAttributeValueRepository(SQLAlchemyAsyncRepository[MetaDataAttributeValue]):
-    """MetaData Tag repository."""
-
-    model_type = MetaDataAttributeValue
-
-
-class AttributeController(Controller):
-    attribute_controller_tag = ['Attribute - CRUD']
-    attribute_path = '/attribute'
-
-    dependencies = {"attribute_repo": Provide(provide_attribute_repo),
-                    }
-
-    @get(path=attribute_path, tags=attribute_controller_tag)
-    async def list_attribute_items(
-            self,
-            attribute_repo: AttributeRepository,
-            limit_offset: LimitOffset,
-    ) -> OffsetPagination[MetaDataAttributeDTO]:
-        """List items."""
-        # alternative way to query tables
-        # stmt = lambda_stmt(lambda: select(Attribute))
-        # stmt += lambda s: s.where(Attribute.meta_data_tag_id == meta_data_tag_id)
-        # results, total = await attribute_repo.list_and_count(limit_offset, statement=stmt)
-
-        try:
-            order_by1 = OrderBy(field_name=MetaDataAttribute.sort_order)
-            order_by2 = OrderBy(field_name=MetaDataAttribute.name)
-            results, total = await attribute_repo.list_and_count(limit_offset,
-                                                                 order_by1,
-                                                                 order_by2)
-            type_adapter = TypeAdapter(list[MetaDataAttributeDTO])
-            return OffsetPagination[MetaDataAttributeDTO](
-                items=type_adapter.validate_python(results),
-                total=total,
-                limit=limit_offset.limit,
-                offset=limit_offset.offset,
-            )
-        except advanced_alchemy.exceptions.RepositoryError as ex:
-            raise HTTPException(detail=str(ex), status_code=status_codes.HTTP_404_NOT_FOUND)
-
-    @get(path='/details/' + attribute_path + '/{attribute_id: int}',
-         tags=attribute_controller_tag)
-    async def get_attribute_item_details(self,
-                                         attribute_repo: AttributeRepository,
-                                         attribute_id: int = Parameter(title="Meta Data Tag ID",
-                                                                       description="The meta_data to update.", ),
-                                         ) -> MetaDataAttributeDTO:
-        try:
-            obj = await attribute_repo.get_one(id=attribute_id)
-            return MetaDataAttributeDTO.model_validate(obj)
-        except Exception as ex:
-            raise HTTPException(detail=str(ex), status_code=status_codes.HTTP_404_NOT_FOUND)
-
-    @post(path=attribute_path, tags=attribute_controller_tag)
-    async def create_attribute_item(self,
-                                    attribute_repo: AttributeRepository,
-                                    data: MetaDataAttributeCreate,
-                                    ) -> MetaDataAttributeDTO:
-        try:
-            _data = data.model_dump(exclude_unset=True, by_alias=False, exclude_defaults=True)
-            obj = await attribute_repo.add(MetaDataAttribute(**_data))
-            await attribute_repo.session.commit()
-            return MetaDataAttributeDTO.model_validate(obj)
-        except Exception as ex:
-            raise HTTPException(detail=str(ex), status_code=status_codes.HTTP_404_NOT_FOUND)
-
-    @route(path=attribute_path + '/{attribute_id: int}',
-           http_method=[HttpMethod.PUT, HttpMethod.PATCH],
-           tags=attribute_controller_tag)
-    async def update_attribute_item(self,
-                                    attribute_repo: AttributeRepository,
-                                    data: MetaDataAttributeCreate,
-                                    attribute_id: int = Parameter(title="Meta Data Tag ID",
-                                                                  description="The meta_data to update.", ),
-                                    ) -> MetaDataAttributeCreate:
-        try:
-            _data = data.model_dump(exclude_unset=True, exclude_defaults=True)
-            _data["id"] = attribute_id
-            # verify that the record is there before trying operation
-            obj = await attribute_repo.update(MetaDataAttribute(**_data), with_for_update=True)
-            await attribute_repo.session.commit()
-            return MetaDataAttributeCreate.model_validate(obj)
-        except Exception as ex:
-            logger.error(ex)
-            raise HTTPException(detail=str(ex), status_code=status_codes.HTTP_404_NOT_FOUND)
-
-    @delete(path=attribute_path + '/{attribute_id: int}', tags=attribute_controller_tag)
-    async def delete_attribute_item(self,
-                                    attribute_repo: AttributeRepository,
-                                    attribute_id: int = Parameter(title="Meta Data Tag ID",
-                                                                  description="The meta_data to update.", ),
-                                    ) -> None:
-        try:
-            # verify that the record is there before trying operation
-            _ = await attribute_repo.delete(attribute_id)
-            await attribute_repo.session.commit()
-        except Exception as ex:
-            raise HTTPException(detail=str(ex), status_code=status_codes.HTTP_404_NOT_FOUND)
-
-
 class MetaDataTagController(Controller):
-    # path = '/meta-data-tag'
+    path = '/meta-data-tag'
     dependencies = {
         "meta_data_tag_repo": Provide(provide_meta_data_tag_repo),
     }
     meta_data_tag_controller_tag = ['Meta Data Tag - CRUD']
     meta_data_tag_path = '/meta-data-tag'
 
-    @get(path=meta_data_tag_path, tags=meta_data_tag_controller_tag)
+    @get(tags=meta_data_tag_controller_tag)
     async def list_meta_data_tag_items(
             self,
             meta_data_tag_repo: MetaDataTagRepository,
@@ -185,7 +67,7 @@ class MetaDataTagController(Controller):
         except Exception as ex:
             raise HTTPException(detail=str(ex), status_code=status_codes.HTTP_404_NOT_FOUND)
 
-    @get(path='/details/' + meta_data_tag_path + "/{meta_data_tag_id: int}", tags=meta_data_tag_controller_tag)
+    @get("/details/{meta_data_tag_id: int}", tags=meta_data_tag_controller_tag)
     async def get_meta_data_tag_details(self,
                                         meta_data_tag_repo: MetaDataTagRepository,
                                         meta_data_tag_id: int = Parameter(title="Meta Data Tag ID",
@@ -198,7 +80,7 @@ class MetaDataTagController(Controller):
         except Exception as ex:
             raise HTTPException(detail=str(ex), status_code=status_codes.HTTP_404_NOT_FOUND)
 
-    @post(path=meta_data_tag_path, tags=meta_data_tag_controller_tag)
+    @post(tags=meta_data_tag_controller_tag)
     async def create_meta_data_tag_item(self, meta_data_tag_repo: MetaDataTagRepository,
                                         data: MetaDataTagCreate, ) -> MetaDataTagDTO:
         """Create a new meta_data tag."""
@@ -211,7 +93,7 @@ class MetaDataTagController(Controller):
         except Exception as ex:
             raise HTTPException(detail=str(ex), status_code=status_codes.HTTP_404_NOT_FOUND)
 
-    @route(path=meta_data_tag_path + "/{meta_data_tag_id:int}",
+    @route("/{meta_data_tag_id:int}",
            http_method=[HttpMethod.PUT, HttpMethod.PATCH],
            tags=meta_data_tag_controller_tag)
     async def update_meta_data_tag_item(
@@ -230,7 +112,7 @@ class MetaDataTagController(Controller):
         except Exception as ex:
             raise HTTPException(detail=str(ex), status_code=status_codes.HTTP_404_NOT_FOUND)
 
-    @delete(path=meta_data_tag_path + "/{meta_data_tag_id:int}", tags=meta_data_tag_controller_tag)
+    @delete("/{meta_data_tag_id:int}", tags=meta_data_tag_controller_tag)
     async def delete_meta_data_tag_item(
             self,
             meta_data_tag_repo: MetaDataTagRepository,

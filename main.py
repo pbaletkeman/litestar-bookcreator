@@ -15,7 +15,8 @@ from litestar.openapi import OpenAPIConfig
 from litestar.template.config import TemplateConfig
 from litestar.response import Template
 
-from controller.meta_data_controller import MetaDataTagController, AttributeController
+from controller.attribute_controller import AttributeController
+from controller.meta_data_controller import MetaDataTagController
 
 if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession
