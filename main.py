@@ -15,7 +15,7 @@ from litestar.openapi import OpenAPIConfig
 from litestar.template.config import TemplateConfig
 from litestar.response import Template
 
-from controller.meta_data_controller import MetaDataTagController
+from controller.meta_data_controller import MetaDataTagController, AttributeController
 
 if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession
@@ -60,7 +60,7 @@ def index_test() -> Template:
 
 
 app = Litestar(
-    route_handlers=[MetaDataTagController, index, index_test],
+    route_handlers=[MetaDataTagController, AttributeController, index, index_test],
     openapi_config=OpenAPIConfig(
         title="My API", version="1.0.0",
         root_schema_site="elements",  # swagger, elements, redoc

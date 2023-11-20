@@ -28,36 +28,10 @@ if TYPE_CHECKING:
 from logger import logger
 
 
-class AttributeRepository(SQLAlchemyAsyncRepository[MetaDataAttribute]):
-    """Attribute repository."""
-    model_type = MetaDataAttribute
-
-
-# class MetaDataTagRepository(SQLAlchemyAsyncSlugRepository[MetaDataTagDef]):
 class MetaDataTagRepository(SQLAlchemyAsyncRepository[MetaDataTag]):
     """MetaData Tag repository."""
 
     model_type = MetaDataTag
-
-
-class MetaDataTagValueRepository(SQLAlchemyAsyncRepository[MetaDataTagValue]):
-    """MetaData Tag repository."""
-
-    model_type = MetaDataTagValue
-
-
-class MetaDataAttributeValueRepository(SQLAlchemyAsyncRepository[MetaDataAttributeValue]):
-    """MetaData Tag repository."""
-
-    model_type = MetaDataAttributeValue
-
-
-# we can optionally override the default `select` used for the repository to pass in
-# specific SQL options such as join details
-async def provide_attribute_repo(db_session: AsyncSession) -> AttributeRepository:
-    """This provides a simple example demonstrating how to override the join options
-    for the repository."""
-    return AttributeRepository(session=db_session)
 
 
 # we can optionally override the default `select` used for the repository to pass in
@@ -68,37 +42,30 @@ async def provide_meta_data_tag_repo(db_session: AsyncSession) -> MetaDataTagRep
     return MetaDataTagRepository(session=db_session)
 
 
-# we can optionally override the default `select` used for the repository to pass in
-# specific SQL options such as join details
-async def provide_attribute_value_repo(db_session: AsyncSession) -> MetaDataAttributeValueRepository:
+class AttributeRepository(SQLAlchemyAsyncRepository[MetaDataAttribute]):
+    """Attribute repository."""
+    model_type = MetaDataAttribute
+
+
+async def provide_attribute_repo(db_session: AsyncSession) -> AttributeRepository:
     """This provides a simple example demonstrating how to override the join options
     for the repository."""
-    return MetaDataAttributeValueRepository(
+    return AttributeRepository(
         session=db_session
     )
 
 
-async def provide_meta_data_tag_value_repo(db_session: AsyncSession) -> MetaDataTagValueRepository:
-    """This provides a simple example demonstrating how to override the join options
-    for the repository."""
-    return MetaDataTagValueRepository(
-        session=db_session
-    )
+class MetaDataAttributeValueRepository(SQLAlchemyAsyncRepository[MetaDataAttributeValue]):
+    """MetaData Tag repository."""
+
+    model_type = MetaDataAttributeValue
 
 
-class MetaDataTagController(Controller):
-    # path = '/meta-data-tag'
-    meta_data_tag_controller_tag = ['Meta Data Tag - CRUD']
-    meta_data_tag_path = '/meta-data-tag'
+class AttributeController(Controller):
     attribute_controller_tag = ['Attribute - CRUD']
     attribute_path = '/attribute'
-    meta_data_controller_tag = ['Meta Data Value - CRUD']
-    meta_data_path = '/meta-data'
 
-    dependencies = {"attribute_value_repo": Provide(provide_attribute_value_repo),
-                    "attribute_repo": Provide(provide_attribute_repo),
-                    "meta_data_tag_repo": Provide(provide_meta_data_tag_repo),
-                    "meta_data_tag_value_repo": Provide(provide_meta_data_tag_value_repo),
+    dependencies = {"attribute_repo": Provide(provide_attribute_repo),
                     }
 
     @get(path=attribute_path, tags=attribute_controller_tag)
@@ -188,6 +155,15 @@ class MetaDataTagController(Controller):
         except Exception as ex:
             raise HTTPException(detail=str(ex), status_code=status_codes.HTTP_404_NOT_FOUND)
 
+
+class MetaDataTagController(Controller):
+    # path = '/meta-data-tag'
+    dependencies = {
+        "meta_data_tag_repo": Provide(provide_meta_data_tag_repo),
+    }
+    meta_data_tag_controller_tag = ['Meta Data Tag - CRUD']
+    meta_data_tag_path = '/meta-data-tag'
+
     @get(path=meta_data_tag_path, tags=meta_data_tag_controller_tag)
     async def list_meta_data_tag_items(
             self,
@@ -265,118 +241,6 @@ class MetaDataTagController(Controller):
          a meta_data tag from the system."""
         try:
             _ = await meta_data_tag_repo.delete(meta_data_tag_id)
-            await meta_data_tag_repo.session.commit()
-        except Exception as ex:
-            raise HTTPException(detail=str(ex), status_code=status_codes.HTTP_404_NOT_FOUND)
-
-    @get(path=meta_data_path, tags=meta_data_controller_tag)
-    async def list_meta_data_items(
-            self,
-            limit_offset: LimitOffset,
-            meta_data_tag_repo: MetaDataTagValueRepository,
-    ) -> OffsetPagination[MetaDataTagValueDTO]:
-        return "pete"
-
-    #
-    # async def list_meta_data_items(
-    #         self,
-    #         meta_data_tag_repo: MetaDataTagValueRepository,
-    #         limit_offset: LimitOffset,
-    # ) -> OffsetPagination[MetaDataTagValueDTO]:
-    #     """List items."""
-    #     try:
-    #         order_by1 = OrderBy(field_name=MetaDataTagValue.id)
-    #         order_by2 = OrderBy(field_name=MetaDataTagValue.tag_value)
-    #         results, total = await meta_data_tag_repo.list_and_count(limit_offset, order_by1, order_by2)
-    #         type_adapter = TypeAdapter(list[MetaDataTagValueDTO])
-    #         return OffsetPagination[MetaDataTagValueDTO](
-    #             items=type_adapter.validate_python(results),
-    #             total=total,
-    #             limit=limit_offset.limit,
-    #             offset=limit_offset.offset,
-    #         )
-    #     except Exception as ex:
-    #         raise HTTPException(detail=str(ex), status_code=status_codes.HTTP_404_NOT_FOUND)
-
-    @get(path='/details/' + meta_data_path + "/{meta_data_id: int}", tags=meta_data_controller_tag)
-    async def get_meta_data_details(self,
-                                    meta_data_tag_repo: MetaDataTagRepository,
-                                    meta_data_id: int = Parameter(title="Meta Data Tag ID",
-                                                                  description="The meta_data to update.", ),
-                                    ) -> MetaDataTagDTO:
-        """Interact with SQLAlchemy engine and session."""
-        try:
-            obj = await meta_data_tag_repo.get_one(id=meta_data_id)
-            return MetaDataTagDTO.model_validate(obj)
-        except Exception as ex:
-            raise HTTPException(detail=str(ex), status_code=status_codes.HTTP_404_NOT_FOUND)
-
-    @post(path=meta_data_path, tags=meta_data_controller_tag)
-    async def create_meta_data_item(self, meta_data_tag_repo: MetaDataAttributeValueRepository,
-                                    meta_data_tag_value_repo: MetaDataTagValueRepository,
-                                    data: MetaDataAttributeValueCreate, ) -> list[MetaDataAttributeValueDTO]:
-        """Create a new meta_data tag."""
-        _data = data.model_dump(exclude_unset=True, by_alias=False, exclude_none=True)
-        try:
-            if 'meta_data_value_create' in _data:
-                meta_data_value_create = _data.get('meta_data_value_create')
-                del _data['meta_data_value_create']
-                temp_item = {"tag_value": meta_data_value_create["tag_value"],
-                             "is_empty_tag": meta_data_value_create.get("is_empty_tag", False),
-                             "meta_data_tag_id": _data["meta_data_tag_id"]}
-                return temp_item
-            if 'attributes' in _data:
-                records = []
-                attributes = _data.get('attributes')
-                del _data['attributes']
-                for att in attributes:
-                    temp_item = _data.copy()
-                    temp_item["attribute_id"] = att.get("id")
-                    temp_item["attribute_value"] = att.get("value")
-                    records.append(temp_item)
-                    # records.append(MetaDataDef(**temp_item))
-                # await meta_data_tag_repo.add_many(records)
-                # await meta_data_tag_repo.session.commit()
-                # return [MetaDataDefDTO.model_validate(x) for x in records]
-                return records
-            else:
-                pass
-                # obj = await meta_data_tag_repo.add(MetaDataDef(**_data))
-                # await meta_data_tag_repo.session.commit()
-                # return [MetaDataDefDTO.model_validate(obj)]
-        except Exception as ex:
-            raise HTTPException(detail=str(ex), status_code=status_codes.HTTP_404_NOT_FOUND)
-
-    @route(path=meta_data_path + "/{meta_data_id:int}",
-           http_method=[HttpMethod.PUT, HttpMethod.PATCH],
-           tags=meta_data_controller_tag)
-    async def update_meta_data_item(
-            self,
-            meta_data_tag_repo: MetaDataAttributeValueRepository,
-            data: MetaDataAttributeValueCreate,
-            meta_data_id: int = Parameter(title="Meta Data Tag ID", description="The meta_data to update.", ),
-    ) -> MetaDataAttributeValueCreate:
-        """Update an meta_data tag."""
-        try:
-            _data = data.model_dump(exclude_unset=True, exclude_none=True)
-            _data.update({"id": meta_data_id})
-            obj = await meta_data_tag_repo.update(MetaDataAttributeValue(**_data))
-            await meta_data_tag_repo.session.commit()
-            return MetaDataAttributeValueCreate.model_validate(obj)
-        except Exception as ex:
-            raise HTTPException(detail=str(ex), status_code=status_codes.HTTP_404_NOT_FOUND)
-
-    @delete(path=meta_data_path + "/{meta_data_id:int}", tags=meta_data_controller_tag)
-    async def delete_meta_data_item(
-            self,
-            meta_data_tag_repo: MetaDataAttributeValueRepository,
-            meta_data_id: int = Parameter(title="Meta Data Tag ID",
-                                          description="The id meta data tag to delete.", ),
-    ) -> None:
-        """## Delete
-         a meta_data tag from the system."""
-        try:
-            _ = await meta_data_tag_repo.delete(meta_data_id)
             await meta_data_tag_repo.session.commit()
         except Exception as ex:
             raise HTTPException(detail=str(ex), status_code=status_codes.HTTP_404_NOT_FOUND)
