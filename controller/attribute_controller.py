@@ -38,11 +38,11 @@ async def provide_attribute_repo(db_session: AsyncSession) -> AttributeRepositor
 
 
 class AttributeController(Controller):
-    attribute_controller_tag = ['Attribute - CRUD']
     path = '/attribute'
 
     dependencies = {"attribute_repo": Provide(provide_attribute_repo),
-                    }
+    }
+    attribute_controller_tag = ['Attribute - CRUD']
 
     @get(tags=attribute_controller_tag)
     async def list_attribute_items(

@@ -44,7 +44,6 @@ class MetaDataTagController(Controller):
         "meta_data_tag_repo": Provide(provide_meta_data_tag_repo),
     }
     meta_data_tag_controller_tag = ['Meta Data Tag - CRUD']
-    meta_data_tag_path = '/meta-data-tag'
 
     @get(tags=meta_data_tag_controller_tag)
     async def list_meta_data_tag_items(

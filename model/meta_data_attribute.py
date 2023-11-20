@@ -10,6 +10,7 @@ if TYPE_CHECKING:
 
 from shared import BaseModel
 
+
 class MetaDataAttribute(BigIntAuditBase):
     """
     <meta property="role" refines="#author_0" scheme="marc:relators">aut</meta>
@@ -25,7 +26,8 @@ class MetaDataAttribute(BigIntAuditBase):
     place_holder: Mapped[str] = mapped_column(String(100), nullable=True, sort_order=3)
     tool_tip: Mapped[str] = mapped_column(String(100), nullable=True, sort_order=4)
     description: Mapped[str] = mapped_column(String(), nullable=True, sort_order=5)
-    meta_data_attribute_values: Mapped[list["MetaDataAttributeValue"]] = relationship(back_populates="attribute")
+
+    # meta_data_attribute_values: Mapped[list["MetaDataAttributeValue"]] = relationship(back_populates="attribute")
 
     def __init__(self, **kw: Any):
         super().__init__(**kw)
