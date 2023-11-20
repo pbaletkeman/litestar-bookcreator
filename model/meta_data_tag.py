@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING, Any, Optional
 
 from advanced_alchemy.base import BigIntAuditBase
 from sqlalchemy import String
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession
@@ -28,6 +28,8 @@ class MetaDataTag(BigIntAuditBase):
     place_holder: Mapped[str] = mapped_column(String(100), nullable=True, sort_order=4)
     tool_tip: Mapped[str] = mapped_column(String(100), nullable=True, sort_order=5)
     description: Mapped[str] = mapped_column(String(), nullable=True, sort_order=6)
+
+    meta_data_tag_master_value: Mapped[list["MetaDataTagValue"]] = relationship(back_populates="meta_data_tag")
 
     def __init__(self, **kw: Any):
         super().__init__(**kw)
