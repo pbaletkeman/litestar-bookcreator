@@ -25,3 +25,11 @@ class MetaData(BigIntAuditBase):
     )
     meta_data_tag: Mapped["MetaDataTagValue"] = relationship(back_populates="meta_data_tag_master_value")
 
+
+class MetaDataDTO(BaseModel):
+    id: Optional[int]
+    name: str
+
+
+class MetaDataCreate(BaseModel):
+    name: str
