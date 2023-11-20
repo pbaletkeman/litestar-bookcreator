@@ -24,30 +24,31 @@ if TYPE_CHECKING:
 from logger import logger
 
 
-class AttributeRepository(SQLAlchemyAsyncRepository[MetaDataAttribute]):
+class MetaDataAttributeRepository(SQLAlchemyAsyncRepository[MetaDataAttribute]):
     """Attribute repository."""
     model_type = MetaDataAttribute
 
 
-async def provide_attribute_repo(db_session: AsyncSession) -> AttributeRepository:
+async def provide_meta_data_attribute_repo(db_session: AsyncSession) -> MetaDataAttributeRepository:
     """This provides a simple example demonstrating how to override the join options
     for the repository."""
-    return AttributeRepository(
+    return MetaDataAttributeRepository(
         session=db_session
     )
 
 
-class AttributeController(Controller):
+class MetaDataAttributeController(Controller):
     path = '/attribute'
 
-    dependencies = {"attribute_repo": Provide(provide_attribute_repo),
+    dependencies = {
+        "attribute_repo": Provide(provide_meta_data_attribute_repo),
     }
     attribute_controller_tag = ['Attribute - CRUD']
 
     @get(tags=attribute_controller_tag)
     async def list_attribute_items(
             self,
-            attribute_repo: AttributeRepository,
+            attribute_repo: MetaDataAttributeRepository,
             limit_offset: LimitOffset,
     ) -> OffsetPagination[MetaDataAttributeDTO]:
         """List items."""
@@ -75,7 +76,7 @@ class AttributeController(Controller):
     @get('/details/{attribute_id: int}',
          tags=attribute_controller_tag)
     async def get_attribute_item_details(self,
-                                         attribute_repo: AttributeRepository,
+                                         attribute_repo: MetaDataAttributeRepository,
                                          attribute_id: int = Parameter(title="Meta Data Tag ID",
                                                                        description="The meta_data to update.", ),
                                          ) -> MetaDataAttributeDTO:
@@ -87,7 +88,7 @@ class AttributeController(Controller):
 
     @post(tags=attribute_controller_tag)
     async def create_attribute_item(self,
-                                    attribute_repo: AttributeRepository,
+                                    attribute_repo: MetaDataAttributeRepository,
                                     data: MetaDataAttributeCreate,
                                     ) -> MetaDataAttributeDTO:
         try:
@@ -102,7 +103,7 @@ class AttributeController(Controller):
            http_method=[HttpMethod.PUT, HttpMethod.PATCH],
            tags=attribute_controller_tag)
     async def update_attribute_item(self,
-                                    attribute_repo: AttributeRepository,
+                                    attribute_repo: MetaDataAttributeRepository,
                                     data: MetaDataAttributeCreate,
                                     attribute_id: int = Parameter(title="Meta Data Tag ID",
                                                                   description="The meta_data to update.", ),
@@ -120,7 +121,7 @@ class AttributeController(Controller):
 
     @delete('/{attribute_id: int}', tags=attribute_controller_tag)
     async def delete_attribute_item(self,
-                                    attribute_repo: AttributeRepository,
+                                    attribute_repo: MetaDataAttributeRepository,
                                     attribute_id: int = Parameter(title="Meta Data Tag ID",
                                                                   description="The meta_data to update.", ),
                                     ) -> None:
