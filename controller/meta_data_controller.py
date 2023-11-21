@@ -17,6 +17,8 @@ from litestar.repository.filters import LimitOffset, OrderBy
 from pydantic import TypeAdapter
 
 from model.meta_data import MetaData, MetaDataDTO, MetaDataCreate
+from model.meta_data_tag_value import MetaDataTagValue
+from model.meta_data_attribute_value import MetaDataAttributeValue
 
 if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession
@@ -28,6 +30,18 @@ class MetaDataRepository(SQLAlchemyAsyncRepository[MetaData]):
     """MetaData Tag repository."""
 
     model_type = MetaData
+
+
+class MetaDataTagValueRepository(SQLAlchemyAsyncRepository[MetaDataTagValue]):
+    """MetaData Tag repository."""
+
+    model_type = MetaDataTagValue
+
+
+class MetaDataAttributeValueRepository(SQLAlchemyAsyncRepository[MetaDataAttributeValue]):
+    """MetaData Tag repository."""
+
+    model_type = MetaDataAttributeValue
 
 
 # we can optionally override the default `select` used for the repository to pass in

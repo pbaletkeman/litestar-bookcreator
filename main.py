@@ -16,6 +16,7 @@ from litestar.template.config import TemplateConfig
 from litestar.response import Template
 
 from controller.meta_data_attribute_controller import MetaDataAttributeController
+from controller.meta_data_controller import MetaDataController
 from controller.meta_data_tag_controller import MetaDataTagController
 
 if TYPE_CHECKING:
@@ -61,7 +62,12 @@ def index_test() -> Template:
 
 
 app = Litestar(
-    route_handlers=[MetaDataTagController, MetaDataAttributeController, index, index_test],
+    route_handlers=[
+        MetaDataTagController,
+        MetaDataAttributeController,
+        MetaDataController,
+        index, index_test
+    ],
     openapi_config=OpenAPIConfig(
         title="My API", version="1.0.0",
         root_schema_site="elements",  # swagger, elements, redoc

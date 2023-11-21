@@ -29,8 +29,6 @@ class MetaDataTag(BigIntAuditBase):
     tool_tip: Mapped[str] = mapped_column(String(100), nullable=True, sort_order=5)
     description: Mapped[str] = mapped_column(String(), nullable=True, sort_order=6)
 
-    # meta_data_tag_master_value: Mapped[list["MetaDataTagValue"]] = relationship(back_populates="meta_data_tag")
-
     def __init__(self, **kw: Any):
         super().__init__(**kw)
         if self.sort_order is None:

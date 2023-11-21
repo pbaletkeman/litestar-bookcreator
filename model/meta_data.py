@@ -4,8 +4,7 @@ from typing import TYPE_CHECKING, Any, Optional, List
 from litestar.contrib.sqlalchemy.base import BigIntAuditBase
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.types import String
-from meta_data_attribute_value import MetaDataAttributeValue
-from meta_data_tag_value import MetaDataTagValue
+
 
 if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession
@@ -15,21 +14,52 @@ from shared import BaseModel
 
 class MetaData(BigIntAuditBase):
 
-    __tablename__ = "meta_data_attribute"
+    __tablename__ = "meta_data"
 
     id: Mapped[int] = mapped_column(primary_key=True, name="meta_data_id", sort_order=-10)
     name: Mapped[str] = mapped_column(String(length=30), nullable=False, sort_order=1)
 
-    meta_data_attribute: Mapped[Optional[List["MetaDataAttributeValue"]]] = (
+    meta_data_master_attribute: Mapped[Optional[List["MetaDataAttributeValue"]]] = (
         relationship(back_populates="meta_data_attribute_master_value")
     )
-    meta_data_tag: Mapped["MetaDataTagValue"] = relationship(back_populates="meta_data_tag_master_value")
+    meta_data_master_tag: Mapped["MetaDataTagValue"] = relationship(back_populates="meta_data_tag_master_value")
+
+
+class MetaDataTagValueDTO(BaseModel):
+    id: int | None
+    meta_data_tag_id: int
+    is_empty_tag: bool | None = False
+    tag_value: str | None
+
+
+class MetaDataValueCreate(BaseModel):
+    meta_data_tag_id: int
+    tag_value: str | None
+    is_empty_tag: bool | None = False
+
+
+class MetaDataAttributeValueDTO(BaseModel):
+    id: int | None
+    attributes: list[MetaDataAttributeTag] | None
+
+
+class MetaDataAttributeValueCreate(BaseModel):
+    attributes: list[MetaDataAttributeTag] | None
+
+
+class MetaDataAttributeTag(BaseModel):
+    id: int
+    value: str
 
 
 class MetaDataDTO(BaseModel):
     id: Optional[int]
     name: str
+    meta_data_tag_value: MetaDataTagValueDTO
+    meta_data_attribute_value: MetaDataAttributeValueDTO
 
 
 class MetaDataCreate(BaseModel):
     name: str
+    meta_data_value: MetaDataValueCreate
+    meta_data_attribute_value_create: MetaDataAttributeValueCreate
