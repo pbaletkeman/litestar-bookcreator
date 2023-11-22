@@ -46,7 +46,7 @@ class MetaDataTagController(Controller):
     meta_data_tag_controller_tag = ['Meta Data Tag - CRUD']
 
     @get(tags=meta_data_tag_controller_tag)
-    async def list_meta_data_tag_items(
+    async def list_meta_data_tags(
             self,
             meta_data_tag_repo: MetaDataTagRepository,
             limit_offset: LimitOffset,
@@ -80,8 +80,8 @@ class MetaDataTagController(Controller):
             raise HTTPException(detail=str(ex), status_code=status_codes.HTTP_404_NOT_FOUND)
 
     @post(tags=meta_data_tag_controller_tag)
-    async def create_meta_data_tag_item(self, meta_data_tag_repo: MetaDataTagRepository,
-                                        data: MetaDataTagCreate, ) -> MetaDataTagDTO:
+    async def create_meta_data_tag(self, meta_data_tag_repo: MetaDataTagRepository,
+                                   data: MetaDataTagCreate, ) -> MetaDataTagDTO:
         """Create a new meta_data tag."""
         try:
             _data = data.model_dump(exclude_unset=True, by_alias=False, exclude_none=True)
@@ -95,7 +95,7 @@ class MetaDataTagController(Controller):
     @route("/{meta_data_tag_id:int}",
            http_method=[HttpMethod.PUT, HttpMethod.PATCH],
            tags=meta_data_tag_controller_tag)
-    async def update_meta_data_tag_item(
+    async def update_meta_data_tag(
             self,
             meta_data_tag_repo: MetaDataTagRepository,
             data: MetaDataTagCreate,
@@ -112,7 +112,7 @@ class MetaDataTagController(Controller):
             raise HTTPException(detail=str(ex), status_code=status_codes.HTTP_404_NOT_FOUND)
 
     @delete("/{meta_data_tag_id:int}", tags=meta_data_tag_controller_tag)
-    async def delete_meta_data_tag_item(
+    async def delete_meta_data_tag(
             self,
             meta_data_tag_repo: MetaDataTagRepository,
             meta_data_tag_id: int = Parameter(title="Meta Data Tag ID",

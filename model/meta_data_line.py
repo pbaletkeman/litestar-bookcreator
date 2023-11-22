@@ -12,11 +12,11 @@ if TYPE_CHECKING:
 from shared import BaseModel
 
 
-class MetaData(BigIntAuditBase):
+class MetaDataLine(BigIntAuditBase):
 
-    __tablename__ = "meta_data"
+    __tablename__ = "meta_data_line"
 
-    id: Mapped[int] = mapped_column(primary_key=True, name="meta_data_id", sort_order=-10)
+    id: Mapped[int] = mapped_column(primary_key=True, name="meta_data_line_id", sort_order=-10)
     name: Mapped[str] = mapped_column(String(length=30), nullable=False, sort_order=1)
 
     # meta_data_master_attribute: Mapped[Optional[List["MetaDataAttributeValue"]]] = (
@@ -52,14 +52,14 @@ class MetaDataAttributeTag(BaseModel):
     value: str
 
 
-class MetaDataDTO(BaseModel):
+class MetaDataLineDTO(BaseModel):
     id: Optional[int]
     name: str
     meta_data_tag_value: MetaDataTagValueDTO
     meta_data_attribute_value: List[MetaDataAttributeValueDTO]
 
 
-class MetaDataCreate(BaseModel):
+class MetaDataLineCreate(BaseModel):
     name: str
     meta_data_value: MetaDataValueCreate
     meta_data_attribute_value_create: List[MetaDataAttributeValueCreate]
