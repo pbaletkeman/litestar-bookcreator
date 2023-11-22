@@ -19,23 +19,18 @@ class MetaDataLine(BigIntAuditBase):
     id: Mapped[int] = mapped_column(primary_key=True, name="meta_data_line_id", sort_order=-10)
     name: Mapped[str] = mapped_column(String(length=30), nullable=False, sort_order=1)
 
-    # meta_data_master_attribute: Mapped[Optional[List["MetaDataAttributeValue"]]] = (
-    #     relationship(back_populates="meta_data_attribute_master_value")
-    # )
-    # meta_data_master_tag: Mapped["MetaDataTagValue"] = relationship(back_populates="meta_data_tag_master_value")
-
 
 class MetaDataTagValueDTO(BaseModel):
     id: int | None
     meta_data_tag_id: int
-    is_empty_tag: bool | None = False
+    # is_empty_tag: bool | None = False
     tag_value: str | None
 
 
 class MetaDataValueCreate(BaseModel):
     meta_data_tag_id: int
     tag_value: str | None
-    is_empty_tag: bool | None = False
+    # is_empty_tag: bool | None = False
 
 
 class MetaDataAttributeValueDTO(BaseModel):
