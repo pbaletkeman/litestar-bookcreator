@@ -27,10 +27,15 @@ class MetaDataTagValue(BigIntAuditBase):
     is_empty_tag: Mapped[Optional[bool]] = mapped_column(Boolean(), nullable=True, sort_order=1, default=False)
     tag_value: Mapped[Optional[str]] = mapped_column(String(), nullable=True, sort_order=6)
 
-    meta_data_tags: Mapped[Optional["MetaDataTag"]] = relationship(back_populates="meta_data_tag_value",
-                                                                   lazy='noload')
-    meta_data_tag_master_value: Mapped[Optional["MetaData"]] = relationship(back_populates="meta_data_master_tag",
-                                                                            lazy='noload')
+    meta_data_tags: Mapped[Optional["MetaDataTag"]] = (
+        relationship("MetaDataTag", foreign_keys="[MetaDataTagValue.meta_data_tag_id]",)
+    )
+
+    # meta_data_tag_master_value: Mapped[Optional["MetaData"]] = (
+    #     relationship(back_populates="meta_data_master_tag",
+    #                  lazy='noload',
+    #                  foreign_keys="[meta_data_tag_value.meta_data_id]",
+    #                  primaryjoin="meta_data_tag_value.meta_data_id=meta_data.id"))
 
     def __init__(self, **kw: Any):
         super().__init__(**kw)

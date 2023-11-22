@@ -6,6 +6,7 @@ from advanced_alchemy.base import BigIntAuditBase
 from sqlalchemy import String, ForeignKey, Boolean
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
+from model.meta_data import MetaData
 # from model.meta_data import MetaData, MetaDataAttributeTag
 from model.meta_data_attribute import MetaDataAttribute
 # from model.meta_data_tag import MetaDataTag
@@ -25,13 +26,17 @@ class MetaDataAttributeValue(BigIntAuditBase):
     """
     __tablename__ = 'meta_data_attribute_value'
     id: Mapped[int] = mapped_column(primary_key=True, name="meta_data_attribute_value_id", sort_order=-10)
-    meta_data_id: Mapped[int] = mapped_column(ForeignKey("MetaData.id"), sort_order=-5)
+    meta_data_id: Mapped[int] = mapped_column(ForeignKey(MetaData.id), sort_order=-5)
     attributes_id: Mapped[int] = mapped_column(ForeignKey(MetaDataAttribute.id), sort_order=-5)
     attribute_value: Mapped[Optional[str]] = mapped_column(String(), nullable=True, sort_order=7)
-    attribute: Mapped[Optional["MetaDataAttribute"]] = relationship(back_populates="meta_data_attribute_value",
-                                                                    lazy='noload')
-    meta_data_attribute_master_value: Mapped[Optional["MetaData"]] = relationship(
-        back_populates="meta_data_master_attribute", lazy='noload')
+
+    attribute: Mapped[Optional["MetaDataAttribute"]] = (
+        relationship(MetaDataAttribute, foreign_keys="[MetaDataAttributeValue.attributes_id]",
+                     )
+    )
+
+    # meta_data_attribute_master_value: Mapped[Optional["MetaData"]] = relationship(
+    #     back_populates="meta_data_master_attribute", lazy='noload', foreign_keys=[meta_data_id])
 
 
 

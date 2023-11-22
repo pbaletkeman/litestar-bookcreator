@@ -19,10 +19,10 @@ class MetaData(BigIntAuditBase):
     id: Mapped[int] = mapped_column(primary_key=True, name="meta_data_id", sort_order=-10)
     name: Mapped[str] = mapped_column(String(length=30), nullable=False, sort_order=1)
 
-    meta_data_master_attribute: Mapped[Optional[List["MetaDataAttributeValue"]]] = (
-        relationship(back_populates="meta_data_attribute_master_value")
-    )
-    meta_data_master_tag: Mapped["MetaDataTagValue"] = relationship(back_populates="meta_data_tag_master_value")
+    # meta_data_master_attribute: Mapped[Optional[List["MetaDataAttributeValue"]]] = (
+    #     relationship(back_populates="meta_data_attribute_master_value")
+    # )
+    # meta_data_master_tag: Mapped["MetaDataTagValue"] = relationship(back_populates="meta_data_tag_master_value")
 
 
 class MetaDataTagValueDTO(BaseModel):

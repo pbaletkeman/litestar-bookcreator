@@ -1,10 +1,11 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Optional
+from typing import TYPE_CHECKING, Any, Optional, List
 
 from advanced_alchemy.base import BigIntAuditBase
-from sqlalchemy import String
+from sqlalchemy import String, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+
 
 if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession
@@ -22,12 +23,21 @@ class MetaDataTag(BigIntAuditBase):
     """
     __tablename__ = 'meta_data_tag'
     id: Mapped[int] = mapped_column(primary_key=True, name="meta_data_tag_id", sort_order=-10)
+    # meta_data_tag_value_id: Mapped[int] = mapped_column(ForeignKey("MetaDataTagValue.id"), sort_order=-5)
+
     sort_order: Mapped[int] = mapped_column(nullable=False, default=0, sort_order=1)
     name: Mapped[str] = mapped_column(String(length=30), nullable=False, sort_order=2)
     tag: Mapped[str] = mapped_column(String(length=30), nullable=False, sort_order=3)
     place_holder: Mapped[str] = mapped_column(String(100), nullable=True, sort_order=4)
     tool_tip: Mapped[str] = mapped_column(String(100), nullable=True, sort_order=5)
     description: Mapped[str] = mapped_column(String(), nullable=True, sort_order=6)
+
+    # meta_data_tag_value: Mapped[List[MetaDataTag]] = (
+    #     relationship(back_populates="meta_data_tags",
+    #                  # foreign_keys="[MetaDataTag.meta_data_tag_value_id]",
+    #                  primaryjoin="MetaDataTag.id==MetaDataTagValue.meta_data_tag_id"
+    #                  )
+    # )
 
     def __init__(self, **kw: Any):
         super().__init__(**kw)
