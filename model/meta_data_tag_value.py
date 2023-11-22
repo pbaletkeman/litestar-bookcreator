@@ -28,11 +28,13 @@ class MetaDataTagValue(BigIntAuditBase):
     tag_value: Mapped[Optional[str]] = mapped_column(String(), nullable=True, sort_order=6)
 
     meta_data_tags: Mapped[Optional["MetaDataTag"]] = (
-        relationship("MetaDataTag", foreign_keys="[MetaDataTagValue.meta_data_tag_id]",)
+        relationship(foreign_keys="[MetaDataTagValue.meta_data_tag_id]",
+                     primaryjoin="MetaDataTagValue.meta_data_tag_id==MetaDataTag.id")
     )
 
     meta_data_tag_master_value: Mapped["MetaDataLine"] = (
-        relationship(MetaDataLine, foreign_keys="[MetaData.meta_data_line_id]", )
+        relationship(foreign_keys="[MetaDataLine.id]",
+                     primaryjoin="MetaDataLine.id==MetaDataTagValue.meta_data_line_id")
     )
 
     def __init__(self, **kw: Any):

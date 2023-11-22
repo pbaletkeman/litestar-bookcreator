@@ -94,16 +94,17 @@ class MetaDataController(Controller):
 
     @post(tags=meta_data_line_controller_tag)
     async def create_meta_data_line(self, meta_data_line_repo: MetaDataLineRepository,
-                                         data: MetaDataLineCreate, ) -> MetaDataLineDTO:
+                                    data: MetaDataLineCreate, ) -> MetaDataLineDTO:
         """Create a new meta_data tag."""
-        try:
-            _data = data.model_dump(exclude_unset=True, by_alias=False, exclude_none=True)
-            # _data["slug"] = await meta_data_tag_repo.get_available_slug(_data["name"])
-            obj = await meta_data_line_repo.add(MetaDataLine(**_data))
-            await meta_data_line_repo.session.commit()
-            return MetaDataLineDTO.model_validate(obj)
-        except Exception as ex:
-            raise HTTPException(detail=str(ex), status_code=status_codes.HTTP_404_NOT_FOUND)
+        return data
+        # try:
+        #     _data = data.model_dump(exclude_unset=True, by_alias=False, exclude_none=True)
+        #     # _data["slug"] = await meta_data_tag_repo.get_available_slug(_data["name"])
+        #     obj = await meta_data_line_repo.add(MetaDataLine(**_data))
+        #     await meta_data_line_repo.session.commit()
+        #     return MetaDataLineDTO.model_validate(obj)
+        # except Exception as ex:
+        #     raise HTTPException(detail=str(ex), status_code=status_codes.HTTP_404_NOT_FOUND)
 
     @route("/{meta_data_line_id:int}",
            http_method=[HttpMethod.PUT, HttpMethod.PATCH],
@@ -138,3 +139,21 @@ class MetaDataController(Controller):
             await meta_data_line_repo.session.commit()
         except Exception as ex:
             raise HTTPException(detail=str(ex), status_code=status_codes.HTTP_404_NOT_FOUND)
+
+
+"""
+{
+   "name":"string",
+   "meta_data_value":{
+      "meta_data_tag_id":1
+   },
+   "meta_data_attribute_value_create":{
+      "attributes":[
+         {
+            "id":1,
+            "value":"t"
+         }
+      ]
+   }
+}
+"""

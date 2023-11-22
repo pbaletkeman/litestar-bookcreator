@@ -6,7 +6,6 @@ from advanced_alchemy.base import BigIntAuditBase
 from sqlalchemy import String, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-
 if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -32,13 +31,6 @@ class MetaDataTag(BigIntAuditBase):
     tool_tip: Mapped[str] = mapped_column(String(100), nullable=True, sort_order=5)
     description: Mapped[str] = mapped_column(String(), nullable=True, sort_order=6)
 
-    # meta_data_tag_value: Mapped[List[MetaDataTag]] = (
-    #     relationship(back_populates="meta_data_tags",
-    #                  # foreign_keys="[MetaDataTag.meta_data_tag_value_id]",
-    #                  primaryjoin="MetaDataTag.id==MetaDataTagValue.meta_data_tag_id"
-    #                  )
-    # )
-
     def __init__(self, **kw: Any):
         super().__init__(**kw)
         if self.sort_order is None:
@@ -62,4 +54,3 @@ class MetaDataTagCreate(BaseModel):
     place_holder: Optional[str] = None
     tool_tip: Optional[str] = None
     description: Optional[str] = None
-
