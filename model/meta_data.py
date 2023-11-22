@@ -56,10 +56,10 @@ class MetaDataDTO(BaseModel):
     id: Optional[int]
     name: str
     meta_data_tag_value: MetaDataTagValueDTO
-    meta_data_attribute_value: MetaDataAttributeValueDTO
+    meta_data_attribute_value: List[MetaDataAttributeValueDTO]
 
 
 class MetaDataCreate(BaseModel):
     name: str
     meta_data_value: MetaDataValueCreate
-    meta_data_attribute_value_create: MetaDataAttributeValueCreate
+    meta_data_attribute_value_create: List[MetaDataAttributeValueCreate]

@@ -31,15 +31,11 @@ class MetaDataTagValue(BigIntAuditBase):
         relationship("MetaDataTag", foreign_keys="[MetaDataTagValue.meta_data_tag_id]",)
     )
 
-    # meta_data_tag_master_value: Mapped[Optional["MetaData"]] = (
-    #     relationship(back_populates="meta_data_master_tag",
-    #                  lazy='noload',
-    #                  foreign_keys="[meta_data_tag_value.meta_data_id]",
-    #                  primaryjoin="meta_data_tag_value.meta_data_id=meta_data.id"))
+    meta_data_tag_master_value: Mapped["MetaData"] = (
+        relationship(MetaData,  foreign_keys="[MetaData.meta_data_id]",)
+    )
 
     def __init__(self, **kw: Any):
         super().__init__(**kw)
         if self.is_empty_tag is None:
             self.is_empty_tag = False
-
-

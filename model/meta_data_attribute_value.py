@@ -31,27 +31,9 @@ class MetaDataAttributeValue(BigIntAuditBase):
     attribute_value: Mapped[Optional[str]] = mapped_column(String(), nullable=True, sort_order=7)
 
     attribute: Mapped[Optional["MetaDataAttribute"]] = (
-        relationship(MetaDataAttribute, foreign_keys="[MetaDataAttributeValue.attributes_id]",
-                     )
+        relationship(MetaDataAttribute, foreign_keys="[MetaDataAttributeValue.attributes_id]", )
     )
 
-    # meta_data_attribute_master_value: Mapped[Optional["MetaData"]] = relationship(
-    #     back_populates="meta_data_master_attribute", lazy='noload', foreign_keys=[meta_data_id])
-
-
-
-
-
-
-
-
-"""
-{
-  "meta_data_tag_id": 3,
-  "tag_value": "string",
-  "attributes": [
-    {"id":1,"value":"test"}
-  ]
-}
-"""
-
+    meta_data_attribute_master_value: Mapped["MetaData"] = (
+        relationship(MetaData,  foreign_keys="[MetaData.meta_data_id]",)
+    )
