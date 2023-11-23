@@ -1,17 +1,13 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Optional, List
+from typing import TYPE_CHECKING, Any, Optional
 
 from advanced_alchemy.base import BigIntAuditBase
 from sqlalchemy import String, ForeignKey, Boolean
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from model.meta_data_line import MetaDataLine
-# from model.meta_data import MetaData, MetaDataAttributeTag
 from model.meta_data_attribute import MetaDataAttribute
-# from model.meta_data_tag import MetaDataTag
-# from model.meta_data_tag_value import MetaDataTagValue
-# from model.meta_data import MetaDataValueCreate
 
 if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession

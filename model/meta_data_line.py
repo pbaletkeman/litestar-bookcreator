@@ -1,8 +1,8 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Optional, List, Union
+from typing import TYPE_CHECKING, Any, Optional, List
 from litestar.contrib.sqlalchemy.base import BigIntAuditBase
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.types import String
 
 if TYPE_CHECKING:
@@ -16,13 +16,12 @@ class MetaDataLine(BigIntAuditBase):
 
     id: Mapped[int] = mapped_column(primary_key=True, name="line_id", sort_order=-10)
     name: Mapped[str] = mapped_column(String(length=30), nullable=False, sort_order=1)
-    # meta_data_tag: Mapped[List["MetaDataTagValue"]] = relationship(back_populates="meta_data_tag_master_value")
 
 
 class MetaDataTagValueDTO(BaseModel):
     id: int | None
     tag_id: int
-    value: Union[str | None]
+    value: str | None
 
 
 class MetaDataValueCreate(BaseModel):
@@ -32,11 +31,11 @@ class MetaDataValueCreate(BaseModel):
 
 class MetaDataAttributeValueDTO(BaseModel):
     id: int | None
-    attributes: list[MetaDataAttributeTag] | None
+    attributes: List[MetaDataAttributeTag] | None
 
 
 class MetaDataAttributeValueCreate(BaseModel):
-    attributes: list[MetaDataAttributeTag] | None
+    attributes: List[MetaDataAttributeTag] | None
 
 
 class MetaDataAttributeTag(BaseModel):
@@ -47,11 +46,11 @@ class MetaDataAttributeTag(BaseModel):
 class MetaDataLineDTO(BaseModel):
     id: Optional[int]
     name: str
-    meta_data_tag_value: MetaDataTagValueDTO
-    meta_data_attribute_value: MetaDataAttributeValueDTO | None
+    tag: MetaDataTagValueDTO
+    attributes: MetaDataAttributeValueDTO
 
 
 class MetaDataLineCreate(BaseModel):
     name: str
-    meta_data_tag_value: MetaDataValueCreate
-    meta_data_attribute_value_create: MetaDataAttributeValueCreate | None
+    tag: MetaDataValueCreate
+    attributes: MetaDataAttributeValueCreate | None

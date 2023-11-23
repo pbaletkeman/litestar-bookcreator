@@ -146,6 +146,7 @@ class MetaDataController(Controller):
    "name":"string",
    "meta_data_tag_value":{
       "tag_id":1
+      "value":"ss"
    },
    "meta_data_attribute_value_create":{
       "attributes":[
