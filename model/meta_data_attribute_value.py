@@ -26,7 +26,7 @@ class MetaDataAttributeValue(BigIntAuditBase):
     """
     __tablename__ = 'meta_data_attribute_value'
     id: Mapped[int] = mapped_column(primary_key=True, name="meta_data_attribute_value_id", sort_order=-10)
-    meta_data_line_id: Mapped[int] = mapped_column(ForeignKey(MetaDataLine.id), sort_order=-5)
+    line_id: Mapped[int] = mapped_column(ForeignKey(MetaDataLine.id), sort_order=-5)
     attribute_id: Mapped[int] = mapped_column(ForeignKey(MetaDataAttribute.id), sort_order=-5)
     attribute_value: Mapped[Optional[str]] = mapped_column(String(), nullable=True, sort_order=7)
 
@@ -37,5 +37,5 @@ class MetaDataAttributeValue(BigIntAuditBase):
 
     meta_data_attribute_master_value: Mapped["MetaDataLine"] = (
         relationship(foreign_keys="[MetaDataLine.id]",
-                     primaryjoin="MetaDataLine.id==MetaDataAttributeValue.meta_data_line_id")
+                     primaryjoin="MetaDataLine.id==MetaDataAttributeValue.line_id")
     )

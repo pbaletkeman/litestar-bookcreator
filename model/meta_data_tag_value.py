@@ -22,22 +22,25 @@ class MetaDataTagValue(BigIntAuditBase):
     """
     __tablename__ = 'meta_data_tag_value'
     id: Mapped[int] = mapped_column(primary_key=True, name="meta_data_value_id", sort_order=-10)
-    meta_data_line_id: Mapped[int] = mapped_column(ForeignKey(MetaDataLine.id), sort_order=-5)
-    meta_data_tag_id: Mapped[int] = mapped_column(ForeignKey(MetaDataTag.id), sort_order=-5)
+    line_id: Mapped[int] = mapped_column(ForeignKey(MetaDataLine.id), sort_order=-5)
+    tag_id: Mapped[int] = mapped_column(ForeignKey(MetaDataTag.id), sort_order=-5)
     is_empty_tag: Mapped[Optional[bool]] = mapped_column(Boolean(), nullable=True, sort_order=1, default=False)
-    tag_value: Mapped[Optional[str]] = mapped_column(String(), nullable=True, sort_order=6)
+    value: Mapped[Optional[str]] = mapped_column(String(), nullable=True, sort_order=6)
 
     meta_data_tags: Mapped[Optional["MetaDataTag"]] = (
-        relationship(foreign_keys="[MetaDataTagValue.meta_data_tag_id]",
-                     primaryjoin="MetaDataTagValue.meta_data_tag_id==MetaDataTag.id")
+        relationship(foreign_keys="[MetaDataTagValue.tag_id]",
+                     primaryjoin="MetaDataTagValue.tag_id==MetaDataTag.id")
     )
 
     meta_data_tag_master_value: Mapped["MetaDataLine"] = (
         relationship(foreign_keys="[MetaDataLine.id]",
-                     primaryjoin="MetaDataLine.id==MetaDataTagValue.meta_data_line_id")
+                     primaryjoin="MetaDataLine.id==MetaDataTagValue.line_id")
     )
 
     def __init__(self, **kw: Any):
         super().__init__(**kw)
-        if self.is_empty_tag is None:
-            self.is_empty_tag = False
+        if self.value is None:
+            self.is_empty_tag = True
+        else:
+            if self.is_empty_tag is None:
+                self.is_empty_tag = False

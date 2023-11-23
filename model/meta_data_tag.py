@@ -21,7 +21,7 @@ class MetaDataTag(BigIntAuditBase):
     meta_data_tag = meta
     """
     __tablename__ = 'meta_data_tag'
-    id: Mapped[int] = mapped_column(primary_key=True, name="meta_data_tag_id", sort_order=-10)
+    id: Mapped[int] = mapped_column(primary_key=True, name="tag_id", sort_order=-10)
     # meta_data_tag_value_id: Mapped[int] = mapped_column(ForeignKey("MetaDataTagValue.id"), sort_order=-5)
 
     sort_order: Mapped[int] = mapped_column(nullable=False, default=0, sort_order=1)

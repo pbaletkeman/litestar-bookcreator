@@ -54,7 +54,7 @@ class MetaDataAttributeController(Controller):
         """List items."""
         # alternative way to query tables
         # stmt = lambda_stmt(lambda: select(Attribute))
-        # stmt += lambda s: s.where(Attribute.meta_data_tag_id == meta_data_tag_id)
+        # stmt += lambda s: s.where(Attribute.tag_id == tag_id)
         # results, total = await attribute_repo.list_and_count(limit_offset, statement=stmt)
 
         try:
