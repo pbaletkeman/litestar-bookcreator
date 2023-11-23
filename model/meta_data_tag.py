@@ -9,10 +9,10 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession
 
-from shared import BaseModel
+from model.base import BaseModel, Base
 
 
-class MetaDataTag(BigIntAuditBase):
+class MetaDataTag(Base):
     """
     <dc:rights>Public domain in the USA.</dc:rights>
     <meta name="cover" content="id-3687803259850171647"/>

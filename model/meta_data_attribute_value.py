@@ -2,9 +2,9 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Optional
 
-from advanced_alchemy.base import BigIntAuditBase
+from advanced_alchemy.base import BigIntAuditBase, AuditColumns, create_registry
 from sqlalchemy import String, ForeignKey, Boolean
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.orm import Mapped, mapped_column, relationship, DeclarativeBase
 
 from model.meta_data_line import MetaDataLine
 from model.meta_data_attribute import MetaDataAttribute
@@ -12,15 +12,17 @@ from model.meta_data_attribute import MetaDataAttribute
 if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession
 
-from shared import BaseModel
+from model.base import Base
 
 
-class MetaDataAttributeValue(BigIntAuditBase):
+class MetaDataAttributeValue(Base):
     """
     <dc:rights>Public domain in the USA.</dc:rights>
     <meta name="cover" content="id-3687803259850171647"/>
     """
     __tablename__ = 'meta_data_attribute_value'
+    registry = create_registry()
+
     id: Mapped[int] = mapped_column(primary_key=True, name="meta_data_attribute_value_id", sort_order=-10)
     line_id: Mapped[int] = mapped_column(ForeignKey(MetaDataLine.id), sort_order=-5)
     attribute_id: Mapped[int] = mapped_column(ForeignKey(MetaDataAttribute.id), sort_order=-5)

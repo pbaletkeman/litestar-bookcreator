@@ -18,6 +18,8 @@ from litestar.response import Template
 from controller.meta_data_attribute_controller import MetaDataAttributeController
 from controller.meta_data_line_controller import MetaDataController
 from controller.meta_data_tag_controller import MetaDataTagController
+from model.base import Base
+from model.meta_data_attribute_value import MetaDataAttributeValue
 
 if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession
@@ -45,7 +47,7 @@ async def on_startup() -> None:
     """Initializes the database."""
     try:
         async with sqlalchemy_config.get_engine().begin() as conn:
-            await conn.run_sync(UUIDAuditBase.metadata.create_all)
+            await conn.run_sync(Base.metadata.create_all)
     except Exception as ex:
         logger.error('db connection issue ' + str(ex))
         sys.exit(1)

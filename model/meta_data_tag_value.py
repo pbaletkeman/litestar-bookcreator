@@ -12,10 +12,10 @@ from model.meta_data_tag import MetaDataTag
 if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession
 
-from shared import BaseModel
+from model.base import Base
 
 
-class MetaDataTagValue(BigIntAuditBase):
+class MetaDataTagValue(Base):
     """
     <dc:rights>Public domain in the USA.</dc:rights>
     <meta name="cover" content="id-3687803259850171647"/>

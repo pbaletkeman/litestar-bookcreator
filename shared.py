@@ -12,12 +12,9 @@ from litestar.contrib.sqlalchemy.repository import (
 )
 from litestar.params import Parameter
 from litestar.repository.filters import LimitOffset
-from pydantic import BaseModel as _BaseModel
-from sqlalchemy.orm import Mapped, declarative_mixin, mapped_column
-from sqlalchemy.types import String
 
 if TYPE_CHECKING:
-    from sqlalchemy.ext.asyncio import AsyncSession
+    pass
 
 
 def provide_limit_offset_pagination(
@@ -41,22 +38,6 @@ def provide_limit_offset_pagination(
         OFFSET to apply to select.
     """
     return LimitOffset(page_size, page_size * (current_page - 1))
-
-
-class BaseModel(_BaseModel):
-    """Extend Pydantic's BaseModel to enable ORM mode"""
-
-    model_config = {"from_attributes": True}
-
-
-# we are going to add a simple "slug" to our model that is a URL safe surrogate key to
-# our database record.
-@declarative_mixin
-class SlugKey:
-    """Slug unique Field Model Mixin."""
-
-    __abstract__ = True
-    slug: Mapped[str] = mapped_column(String(length=100), nullable=False, unique=True, sort_order=99)
 
 
 # this class can be re-used with any model that has the `SlugKey` Mixin

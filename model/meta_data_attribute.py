@@ -8,10 +8,10 @@ from sqlalchemy.types import String
 if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession
 
-from shared import BaseModel
+from model.base import BaseModel, Base
 
 
-class MetaDataAttribute(BigIntAuditBase):
+class MetaDataAttribute(Base):
     """
     <meta property="role" refines="#author_0" scheme="marc:relators">aut</meta>
     Attribute = property

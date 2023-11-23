@@ -8,10 +8,10 @@ from sqlalchemy.types import String
 if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession
 
-from shared import BaseModel
+from model.base import BaseModel, Base
 
 
-class MetaDataLine(BigIntAuditBase):
+class MetaDataLine(Base):
     __tablename__ = "meta_data_line"
 
     id: Mapped[int] = mapped_column(primary_key=True, name="line_id", sort_order=-10)
