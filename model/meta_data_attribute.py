@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Optional
+from typing import TYPE_CHECKING, Any, Optional, List
 from litestar.contrib.sqlalchemy.base import BigIntAuditBase
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.types import String
@@ -26,6 +26,8 @@ class MetaDataAttribute(BigIntAuditBase):
     place_holder: Mapped[str] = mapped_column(String(100), nullable=True, sort_order=3)
     tool_tip: Mapped[str] = mapped_column(String(100), nullable=True, sort_order=4)
     description: Mapped[str] = mapped_column(String(), nullable=True, sort_order=5)
+
+    attribute_values: Mapped[List["MetaDataAttributeValue"]] = relationship(back_populates="attribute")
 
     def __init__(self, **kw: Any):
         super().__init__(**kw)

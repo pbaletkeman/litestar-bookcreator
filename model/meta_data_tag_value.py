@@ -27,9 +27,10 @@ class MetaDataTagValue(BigIntAuditBase):
     is_empty_tag: Mapped[Optional[bool]] = mapped_column(Boolean(), nullable=True, sort_order=1, default=False)
     value: Mapped[Optional[str]] = mapped_column(String(), nullable=True, sort_order=6)
 
-    meta_data_tags: Mapped[Optional["MetaDataTag"]] = (
+    meta_data_tag: Mapped[Optional["MetaDataTag"]] = (
         relationship(foreign_keys="[MetaDataTagValue.tag_id]",
-                     primaryjoin="MetaDataTagValue.tag_id==MetaDataTag.id")
+                     primaryjoin="MetaDataTagValue.tag_id==MetaDataTag.id",
+                     back_populates="tag_values")
     )
 
     meta_data_tag_master_value: Mapped["MetaDataLine"] = (
