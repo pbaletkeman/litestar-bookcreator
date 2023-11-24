@@ -15,7 +15,7 @@ class Base(DeclarativeBase, AuditColumns):
 class BaseModel(_BaseModel):
     """Extend Pydantic's BaseModel to enable ORM mode"""
 
-    model_config = {"from_attributes": True}
+    model_config = {'from_attributes': True}
 
 
 # we are going to add a simple "slug" to our model that is a URL safe surrogate key to

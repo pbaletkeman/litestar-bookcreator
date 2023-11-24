@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Optional
 
-from advanced_alchemy.base import BigIntAuditBase, AuditColumns, create_registry
 from sqlalchemy import String, ForeignKey, Boolean
 from sqlalchemy.orm import Mapped, mapped_column, relationship, DeclarativeBase
 
@@ -21,19 +20,18 @@ class MetaDataAttributeValue(Base):
     <meta name="cover" content="id-3687803259850171647"/>
     """
     __tablename__ = 'meta_data_attribute_value'
-    registry = create_registry()
 
-    id: Mapped[int] = mapped_column(primary_key=True, name="meta_data_attribute_value_id", sort_order=-10)
+    id: Mapped[int] = mapped_column(primary_key=True, name='meta_data_attribute_value_id', sort_order=-10)
     line_id: Mapped[int] = mapped_column(ForeignKey(MetaDataLine.id), sort_order=-5)
     attribute_id: Mapped[int] = mapped_column(ForeignKey(MetaDataAttribute.id), sort_order=-5)
     attribute_value: Mapped[Optional[str]] = mapped_column(String(), nullable=True, sort_order=7)
 
-    attribute: Mapped[Optional["MetaDataAttribute"]] = (
-        relationship(foreign_keys="[MetaDataAttributeValue.attribute_id]",
-                     primaryjoin="MetaDataAttributeValue.attribute_id==MetaDataAttribute.id")
+    attribute: Mapped[Optional['MetaDataAttribute']] = (
+        relationship(foreign_keys='[MetaDataAttributeValue.attribute_id]',
+                     primaryjoin='MetaDataAttributeValue.attribute_id==MetaDataAttribute.id')
     )
 
-    meta_data_attribute_master_value: Mapped["MetaDataLine"] = (
-        relationship(foreign_keys="[MetaDataLine.id]",
-                     primaryjoin="MetaDataLine.id==MetaDataAttributeValue.line_id")
+    meta_data_attribute_master_value: Mapped['MetaDataLine'] = (
+        relationship(foreign_keys='[MetaDataLine.id]',
+                     primaryjoin='MetaDataLine.id==MetaDataAttributeValue.line_id')
     )

@@ -18,9 +18,9 @@ if TYPE_CHECKING:
 
 
 def provide_limit_offset_pagination(
-    current_page: int = Parameter(ge=1, query="currentPage", default=1, required=False),
+    current_page: int = Parameter(ge=1, query='currentPage', default=1, required=False),
     page_size: int = Parameter(
-        query="pageSize",
+        query='pageSize',
         ge=1,
         default=10,
         required=False,
@@ -82,9 +82,9 @@ class SQLAlchemyAsyncSlugRepository(SQLAlchemyAsyncRepository[ModelT]):
         Returns:
             str: a slugified string of the value parameter
         """
-        value = unicodedata.normalize("NFKD", value).encode("ascii", "ignore").decode("ascii")
-        value = re.sub(r"[^\w\s-]", "", value.lower())
-        return re.sub(r"[-\s]+", "-", value).strip("-_")
+        value = unicodedata.normalize('NFKD', value).encode('ascii', 'ignore').decode('ascii')
+        value = re.sub(r'[^\w\s-]', '', value.lower())
+        return re.sub(r'[-\s]+', '-', value).strip('-_')
 
     async def _is_slug_unique(self, slug: str, **kwargs: Any, ) -> bool:
         return await self.get_one_or_none(slug=slug) is None

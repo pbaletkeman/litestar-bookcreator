@@ -41,7 +41,7 @@ async def provide_meta_data_tag_repo(db_session: AsyncSession) -> MetaDataTagRep
 class MetaDataTagController(Controller):
     path = '/meta-data-tag'
     dependencies = {
-        "meta_data_tag_repo": Provide(provide_meta_data_tag_repo),
+        'meta_data_tag_repo': Provide(provide_meta_data_tag_repo),
     }
     meta_data_tag_controller_tag = ['Meta Data Tag - CRUD']
 
@@ -66,11 +66,11 @@ class MetaDataTagController(Controller):
         except Exception as ex:
             raise HTTPException(detail=str(ex), status_code=status_codes.HTTP_404_NOT_FOUND)
 
-    @get("/details/{tag_id: int}", tags=meta_data_tag_controller_tag)
+    @get('/details/{tag_id: int}', tags=meta_data_tag_controller_tag)
     async def get_meta_data_tag_details(self,
                                         meta_data_tag_repo: MetaDataTagRepository,
-                                        tag_id: int = Parameter(title="Meta Data Tag ID",
-                                                                          description="The meta_data to update.", ),
+                                        tag_id: int = Parameter(title='Meta Data Tag ID',
+                                                                          description='The meta_data to update.', ),
                                         ) -> MetaDataTagDTO:
         """Interact with SQLAlchemy engine and session."""
         try:
@@ -92,31 +92,31 @@ class MetaDataTagController(Controller):
         except Exception as ex:
             raise HTTPException(detail=str(ex), status_code=status_codes.HTTP_404_NOT_FOUND)
 
-    @route("/{tag_id:int}",
+    @route('/{tag_id:int}',
            http_method=[HttpMethod.PUT, HttpMethod.PATCH],
            tags=meta_data_tag_controller_tag)
     async def update_meta_data_tag(
             self,
             meta_data_tag_repo: MetaDataTagRepository,
             data: MetaDataTagCreate,
-            tag_id: int = Parameter(title="Meta Data Tag ID", description="The meta_data to update.", ),
+            tag_id: int = Parameter(title='Meta Data Tag ID', description='The meta_data to update.', ),
     ) -> MetaDataTagCreate:
         """Update an meta_data tag."""
         try:
             _data = data.model_dump(exclude_unset=True, exclude_none=True)
-            _data.update({"id": tag_id})
+            _data.update({'id': tag_id})
             obj = await meta_data_tag_repo.update(MetaDataTag(**_data))
             await meta_data_tag_repo.session.commit()
             return MetaDataTagCreate.model_validate(obj)
         except Exception as ex:
             raise HTTPException(detail=str(ex), status_code=status_codes.HTTP_404_NOT_FOUND)
 
-    @delete("/{tag_id:int}", tags=meta_data_tag_controller_tag)
+    @delete('/{tag_id:int}', tags=meta_data_tag_controller_tag)
     async def delete_meta_data_tag(
             self,
             meta_data_tag_repo: MetaDataTagRepository,
-            tag_id: int = Parameter(title="Meta Data Tag ID",
-                                              description="The id meta data tag to delete.", ),
+            tag_id: int = Parameter(title='Meta Data Tag ID',
+                                              description='The id meta data tag to delete.', ),
     ) -> None:
         """## Delete
          a meta_data tag from the system."""

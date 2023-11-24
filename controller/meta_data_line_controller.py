@@ -55,7 +55,7 @@ async def provide_meta_data_line_repo(db_session: AsyncSession) -> MetaDataLineR
 class MetaDataController(Controller):
     path = '/meta-data-line'
     dependencies = {
-        "meta_data_line_repo": Provide(provide_meta_data_line_repo),
+        'meta_data_line_repo': Provide(provide_meta_data_line_repo),
     }
     meta_data_line_controller_tag = ['Meta Data Line - CRUD']
 
@@ -79,11 +79,11 @@ class MetaDataController(Controller):
         except Exception as ex:
             raise HTTPException(detail=str(ex), status_code=status_codes.HTTP_404_NOT_FOUND)
 
-    @get("/details/{line_id: int}", tags=meta_data_line_controller_tag)
+    @get('/details/{line_id: int}', tags=meta_data_line_controller_tag)
     async def get_meta_data_line_details(self,
                                          meta_data_line_repo: MetaDataLineRepository,
-                                         line_id: int = Parameter(title="Meta Data Tag ID",
-                                                                            description="The meta_data to update.", ),
+                                         line_id: int = Parameter(title='Meta Data Tag ID',
+                                                                            description='The meta_data to update.', ),
                                          ) -> MetaDataLineDTO:
         """Interact with SQLAlchemy engine and session."""
         try:
@@ -106,14 +106,14 @@ class MetaDataController(Controller):
         # except Exception as ex:
         #     raise HTTPException(detail=str(ex), status_code=status_codes.HTTP_404_NOT_FOUND)
 
-    @route("/{line_id:int}",
+    @route('/{line_id:int}',
            http_method=[HttpMethod.PUT, HttpMethod.PATCH],
            tags=meta_data_line_controller_tag)
     async def update_meta_data_line(
             self,
             meta_data_line_repo: MetaDataLineRepository,
             data: MetaDataLineCreate,
-            line_id: int = Parameter(title="Meta Data Tag ID", description="The meta_data to update.", ),
+            line_id: int = Parameter(title='Meta Data Tag ID', description='The meta_data to update.', ),
     ) -> MetaDataLineCreate:
         """Update an meta_data tag."""
         try:
@@ -125,12 +125,12 @@ class MetaDataController(Controller):
         except Exception as ex:
             raise HTTPException(detail=str(ex), status_code=status_codes.HTTP_404_NOT_FOUND)
 
-    @delete("/{line_id:int}", tags=meta_data_line_controller_tag)
+    @delete('/{line_id:int}', tags=meta_data_line_controller_tag)
     async def delete_meta_data_lines(
             self,
             meta_data_line_repo: MetaDataLineRepository,
-            line_id: int = Parameter(title="Meta Data Tag ID",
-                                               description="The id meta data tag to delete.", ),
+            line_id: int = Parameter(title='Meta Data Tag ID',
+                                               description='The id meta data tag to delete.', ),
     ) -> None:
         """## Delete
          a meta_data tag from the system."""

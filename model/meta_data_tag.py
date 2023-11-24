@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Optional, List
 
-from advanced_alchemy.base import BigIntAuditBase
 from sqlalchemy import String, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -21,7 +20,7 @@ class MetaDataTag(Base):
     meta_data_tag = meta
     """
     __tablename__ = 'meta_data_tag'
-    id: Mapped[int] = mapped_column(primary_key=True, name="tag_id", sort_order=-10)
+    id: Mapped[int] = mapped_column(primary_key=True, name='tag_id', sort_order=-10)
     # meta_data_tag_value_id: Mapped[int] = mapped_column(ForeignKey("MetaDataTagValue.id"), sort_order=-5)
 
     sort_order: Mapped[int] = mapped_column(nullable=False, default=0, sort_order=1)
@@ -31,7 +30,7 @@ class MetaDataTag(Base):
     tool_tip: Mapped[str] = mapped_column(String(100), nullable=True, sort_order=5)
     description: Mapped[str] = mapped_column(String(), nullable=True, sort_order=6)
 
-    tag_values: Mapped[List["MetaDataTagValue"]] = relationship(back_populates="meta_data_tag")
+    tag_values: Mapped[List['MetaDataTagValue']] = relationship(back_populates="meta_data_tag")
 
     def __init__(self, **kw: Any):
         super().__init__(**kw)

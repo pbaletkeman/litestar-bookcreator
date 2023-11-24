@@ -3,7 +3,7 @@ import logging
 
 def get_logger(mod_name: str) -> logging.Logger:
     """Return logger object."""
-    format_obj = "%(asctime)s: %(name)s: %(levelname)s: %(message)s"
+    format_obj = '%(asctime)s: %(name)s: %(levelname)s: %(message)s'
     logger_obj = logging.getLogger(mod_name)
     # Writes to stdout
     ch = logging.StreamHandler()

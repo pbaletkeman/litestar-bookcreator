@@ -33,14 +33,14 @@ from shared import provide_limit_offset_pagination
 session_config = AsyncSessionConfig(expire_on_commit=False)
 sqlalchemy_config = SQLAlchemyAsyncConfig(
     # connection_string="sqlite+aiosqlite:///test.sqlite", session_config=session_config
-    connection_string="postgresql+asyncpg://pete:pete@host.docker.internal:5432/sample_project",
+    connection_string='postgresql+asyncpg://pete:pete@host.docker.internal:5432/sample_project',
     session_config=session_config
 
 )  # Create 'async_session' dependency.
 sqlalchemy_plugin = SQLAlchemyInitPlugin(config=sqlalchemy_config)
 
 logging.basicConfig()
-logging.getLogger("sqlalchemy.engine").setLevel(logging.INFO)
+logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)
 
 
 async def on_startup() -> None:
@@ -53,14 +53,14 @@ async def on_startup() -> None:
         sys.exit(1)
 
 
-@get(path="/", sync_to_thread=False)
+@get(path='/', sync_to_thread=False)
 def index(name: str) -> Template:
-    return Template(template_name="hello.html.mako", context={"name": name})
+    return Template(template_name='hello.html.mako', context={"name": name})
 
 
-@get(path="/test", sync_to_thread=False)
+@get(path='/test', sync_to_thread=False)
 def index_test() -> Template:
-    return Template(template_name="test.html.mako")
+    return Template(template_name='test.html.mako')
 
 
 app = Litestar(
@@ -71,9 +71,9 @@ app = Litestar(
         index, index_test
     ],
     openapi_config=OpenAPIConfig(
-        title="My API", version="1.0.0",
-        root_schema_site="elements",  # swagger, elements, redoc
-        path="/docs",
+        title='My API', version='1.0.0',
+        root_schema_site='elements',  # swagger, elements, redoc
+        path='/docs',
         create_examples=False,
         use_handler_docstrings=True,
     ),
@@ -82,11 +82,11 @@ app = Litestar(
         # exceptions.ApplicationError: exceptions.exception_to_http_response,
     },
     template_config=TemplateConfig(
-        directory=Path("templates"),
+        directory=Path('templates'),
         engine=MakoTemplateEngine,
     ),
     on_startup=[on_startup],
     plugins=[SQLAlchemyInitPlugin(config=sqlalchemy_config)],
-    dependencies={"limit_offset": Provide(provide_limit_offset_pagination, sync_to_thread=False)},
-    compression_config=CompressionConfig(backend="gzip", gzip_compress_level=9),
+    dependencies={'limit_offset': Provide(provide_limit_offset_pagination, sync_to_thread=False)},
+    compression_config=CompressionConfig(backend='gzip', gzip_compress_level=9),
 )

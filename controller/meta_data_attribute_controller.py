@@ -41,7 +41,7 @@ class MetaDataAttributeController(Controller):
     path = '/attribute'
 
     dependencies = {
-        "attribute_repo": Provide(provide_meta_data_attribute_repo),
+        'attribute_repo': Provide(provide_meta_data_attribute_repo),
     }
     attribute_controller_tag = ['Meta Data Attribute - CRUD']
 
@@ -77,8 +77,8 @@ class MetaDataAttributeController(Controller):
          tags=attribute_controller_tag)
     async def get_meta_data_attribute_details(self,
                                               attribute_repo: MetaDataAttributeRepository,
-                                              attribute_id: int = Parameter(title="Meta Data Tag ID",
-                                                                            description="The meta_data to update.", ),
+                                              attribute_id: int = Parameter(title='Meta Data Tag ID',
+                                                                            description='The meta_data to update.', ),
                                               ) -> MetaDataAttributeDTO:
         try:
             obj = await attribute_repo.get_one(id=attribute_id)
@@ -105,8 +105,8 @@ class MetaDataAttributeController(Controller):
     async def update_meta_data_attribute(self,
                                          attribute_repo: MetaDataAttributeRepository,
                                          data: MetaDataAttributeCreate,
-                                         attribute_id: int = Parameter(title="Meta Data Tag ID",
-                                                                       description="The meta_data to update.", ),
+                                         attribute_id: int = Parameter(title='Meta Data Tag ID',
+                                                                       description='The meta_data to update.', ),
                                          ) -> MetaDataAttributeCreate:
         try:
             _data = data.model_dump(exclude_unset=True, exclude_defaults=True)
@@ -122,8 +122,8 @@ class MetaDataAttributeController(Controller):
     @delete('/{attribute_id: int}', tags=attribute_controller_tag)
     async def delete_meta_data_attribute(self,
                                          attribute_repo: MetaDataAttributeRepository,
-                                         attribute_id: int = Parameter(title="Meta Data Tag ID",
-                                                                       description="The meta_data to update.", ),
+                                         attribute_id: int = Parameter(title='Meta Data Tag ID',
+                                                                       description='The meta_data to update.', ),
                                          ) -> None:
         try:
             # verify that the record is there before trying operation
