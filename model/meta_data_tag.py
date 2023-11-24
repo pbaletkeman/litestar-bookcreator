@@ -9,7 +9,6 @@ if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession
 
 from model.base import BaseModel, Base
-from meta_data_tag_value import MetaDataTagValue
 
 
 class MetaDataTag(Base):
