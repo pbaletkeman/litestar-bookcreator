@@ -8,6 +8,7 @@ if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession
 
 from model.base import BaseModel, Base
+from meta_data_attribute_value import MetaDataAttributeValue
 
 
 class MetaDataAttribute(Base):
