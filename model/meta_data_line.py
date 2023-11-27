@@ -46,10 +46,10 @@ class MetaDataLineDTO(BaseModel):
     id: Optional[int]
     name: str
     tag: MetaDataTagValueDTO
-    attributes: MetaDataAttributeValueDTO
+    attributes: List[MetaDataAttributeTag] | None
 
 
 class MetaDataLineCreate(BaseModel):
     name: str
     tag: MetaDataValueCreate
-    attributes: MetaDataAttributeValueCreate | None
+    attributes: List[MetaDataAttributeTag] | None

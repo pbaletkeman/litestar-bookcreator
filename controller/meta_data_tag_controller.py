@@ -70,7 +70,7 @@ class MetaDataTagController(Controller):
     async def get_meta_data_tag_details(self,
                                         meta_data_tag_repo: MetaDataTagRepository,
                                         tag_id: int = Parameter(title='Meta Data Tag ID',
-                                                                          description='The meta_data to update.', ),
+                                                                description='The meta_data to update.', ),
                                         ) -> MetaDataTagDTO:
         """Interact with SQLAlchemy engine and session."""
         try:
@@ -116,7 +116,7 @@ class MetaDataTagController(Controller):
             self,
             meta_data_tag_repo: MetaDataTagRepository,
             tag_id: int = Parameter(title='Meta Data Tag ID',
-                                              description='The id meta data tag to delete.', ),
+                                    description='The id meta data tag to delete.', ),
     ) -> None:
         """## Delete
          a meta_data tag from the system."""
