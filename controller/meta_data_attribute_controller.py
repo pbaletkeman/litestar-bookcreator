@@ -17,6 +17,7 @@ from litestar.repository.filters import LimitOffset, OrderBy
 from pydantic import TypeAdapter
 
 from model.meta_data_attribute import MetaDataAttribute, MetaDataAttributeDTO, MetaDataAttributeCreate
+from model.meta_data_attribute_value import MetaDataAttributeValue
 
 if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession
@@ -131,3 +132,9 @@ class MetaDataAttributeController(Controller):
             await attribute_repo.session.commit()
         except Exception as ex:
             raise HTTPException(detail=str(ex), status_code=status_codes.HTTP_404_NOT_FOUND)
+
+
+class MetaDataAttributeValueRepository(SQLAlchemyAsyncRepository[MetaDataAttributeValue]):
+    """MetaData Tag repository."""
+
+    model_type = MetaDataAttributeValue

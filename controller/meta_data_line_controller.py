@@ -1,8 +1,7 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, List
 
-import advanced_alchemy
 from litestar.exceptions import HTTPException
 from litestar import status_codes
 from advanced_alchemy import SQLAlchemyAsyncRepository
@@ -16,32 +15,26 @@ from litestar.params import Parameter
 from litestar.repository.filters import LimitOffset, OrderBy
 from pydantic import TypeAdapter
 
+from model.meta_data_attribute_value import MetaDataAttributeValue
 from model.meta_data_line import MetaDataLine, MetaDataLineDTO, MetaDataLineCreate
 from model.meta_data_tag_value import MetaDataTagValue
-from model.meta_data_attribute_value import MetaDataAttributeValue
 
 if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession
 
-from logger import logger
 
-
-class MetaDataLineRepository(SQLAlchemyAsyncRepository[MetaDataLine]):
-    """MetaData Tag repository."""
-
-    model_type = MetaDataLine
+class MetaDataAttributeValueRepository(SQLAlchemyAsyncRepository[MetaDataAttributeValue]):
+    """MetaData Line repository."""
+    model_type = MetaDataAttributeValue
 
 
 class MetaDataTagValueRepository(SQLAlchemyAsyncRepository[MetaDataTagValue]):
-    """MetaData Tag repository."""
-
     model_type = MetaDataTagValue
 
 
-class MetaDataAttributeValueRepository(SQLAlchemyAsyncRepository[MetaDataAttributeValue]):
-    """MetaData Tag repository."""
-
-    model_type = MetaDataAttributeValue
+class MetaDataLineRepository(SQLAlchemyAsyncRepository[MetaDataLine]):
+    """MetaData Line repository."""
+    model_type = MetaDataLine
 
 
 # we can optionally override the default `select` used for the repository to pass in
@@ -52,10 +45,20 @@ async def provide_meta_data_line_repo(db_session: AsyncSession) -> MetaDataLineR
     return MetaDataLineRepository(session=db_session)
 
 
+async def provide_meta_data_tag_value_repo(db_session: AsyncSession) -> MetaDataTagValueRepository:
+    return MetaDataTagValueRepository(session=db_session)
+
+
+async def provide_meta_data_attribute_value_repo(db_session: AsyncSession) -> MetaDataAttributeValueRepository:
+    return MetaDataAttributeValueRepository(session=db_session)
+
+
 class MetaDataController(Controller):
     path = '/meta-data-line'
     dependencies = {
         'meta_data_line_repo': Provide(provide_meta_data_line_repo),
+        'meta_data_tag_value_repo': Provide(provide_meta_data_tag_value_repo),
+        'meta_data_attribute_value_repo': Provide(provide_meta_data_attribute_value_repo)
     }
     meta_data_line_controller_tag = ['Meta Data Line - CRUD']
 
@@ -83,7 +86,7 @@ class MetaDataController(Controller):
     async def get_meta_data_line_details(self,
                                          meta_data_line_repo: MetaDataLineRepository,
                                          line_id: int = Parameter(title='Meta Data Tag ID',
-                                                                            description='The meta_data to update.', ),
+                                                                  description='The meta_data to update.', ),
                                          ) -> MetaDataLineDTO:
         """Interact with SQLAlchemy engine and session."""
         try:
@@ -93,10 +96,20 @@ class MetaDataController(Controller):
             raise HTTPException(detail=str(ex), status_code=status_codes.HTTP_404_NOT_FOUND)
 
     @post(tags=meta_data_line_controller_tag)
-    async def create_meta_data_line(self, meta_data_line_repo: MetaDataLineRepository,
+    async def create_meta_data_line(self,
+                                    meta_data_line_repo: MetaDataLineRepository,
+                                    meta_data_tag_value_repo: MetaDataTagValueRepository,
+                                    meta_data_attribute_value_repo: MetaDataAttributeValueRepository,
                                     data: MetaDataLineCreate, ) -> MetaDataLineDTO:
         """Create a new meta_data tag."""
-        return data
+        _data = data.model_dump(exclude_unset=True, by_alias=False, exclude_none=True)
+        tag: MetaDataTagValue = _data.get('tag')  # get tag element, or null
+        attributes: List[MetaDataAttributeValue] = _data.get('attributes')  # get attributes element, or null
+        _data.pop('tag', None)  # remove tag element from data source
+        _data.pop('attributes', None)  # remove attribute element from data source
+        line_item = await meta_data_line_repo.add(MetaDataLine(**_data))
+
+        return MetaDataLineDTO.model_validate(line_item)
         # try:
         #     _data = data.model_dump(exclude_unset=True, by_alias=False, exclude_none=True)
         #     # _data["slug"] = await meta_data_tag_repo.get_available_slug(_data["name"])
@@ -130,7 +143,7 @@ class MetaDataController(Controller):
             self,
             meta_data_line_repo: MetaDataLineRepository,
             line_id: int = Parameter(title='Meta Data Tag ID',
-                                               description='The id meta data tag to delete.', ),
+                                     description='The id meta data tag to delete.', ),
     ) -> None:
         """## Delete
          a meta_data tag from the system."""
@@ -143,18 +156,16 @@ class MetaDataController(Controller):
 
 """
 {
-   "name":"string",
-   "meta_data_tag_value":{
-      "tag_id":1
-      "value":"ss"
-   },
-   "meta_data_attribute_value_create":{
-      "attributes":[
-         {
-            "id":1,
-            "value":"t"
-         }
-      ]
-   }
+  "name":"string",
+  "tag":{
+     "tag_id":1,
+     "value":"nul"
+  },
+  "attributes":[
+    {
+        "id":1,
+        "value":"a"
+    }
+  ]
 }
 """
