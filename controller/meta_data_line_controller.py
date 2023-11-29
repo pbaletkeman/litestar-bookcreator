@@ -96,29 +96,17 @@ class MetaDataController(Controller):
             raise HTTPException(detail=str(ex), status_code=status_codes.HTTP_404_NOT_FOUND)
 
     @post(tags=meta_data_line_controller_tag)
-    async def create_meta_data_line(self,
-                                    meta_data_line_repo: MetaDataLineRepository,
-                                    meta_data_tag_value_repo: MetaDataTagValueRepository,
-                                    meta_data_attribute_value_repo: MetaDataAttributeValueRepository,
+    async def create_meta_data_line(self, meta_data_line_repo: MetaDataLineRepository,
                                     data: MetaDataLineCreate, ) -> MetaDataLineDTO:
         """Create a new meta_data tag."""
-        _data = data.model_dump(exclude_unset=True, by_alias=False, exclude_none=True)
-        # tag: MetaDataTagValue = _data.get('tag')  # get tag element, or null
-        # attributes: List[MetaDataAttributeValue] = _data.get('attributes')  # get attributes element, or null
-        # _data.pop('tag', None)  # remove tag element from data source
-        # _data.pop('attributes', None)  # remove attribute element from data source
-        line_item = await meta_data_line_repo.add(MetaDataLine(**_data))
-        # return MetaDataLine.from_dto(**_data)
-        #
-        return MetaDataLineDTO.model_validate(line_item)
-        # try:
-        #     _data = data.model_dump(exclude_unset=True, by_alias=False, exclude_none=True)
-        #     # _data["slug"] = await meta_data_tag_repo.get_available_slug(_data["name"])
-        #     obj = await meta_data_line_repo.add(MetaDataLine(**_data))
-        #     await meta_data_line_repo.session.commit()
-        #     return MetaDataLineDTO.model_validate(obj)
-        # except Exception as ex:
-        #     raise HTTPException(detail=str(ex), status_code=status_codes.HTTP_404_NOT_FOUND)
+        try:
+            _data = data.model_dump(exclude_unset=True, by_alias=False, exclude_none=True)
+            # _data["slug"] = await meta_data_tag_repo.get_available_slug(_data["name"])
+            obj = await meta_data_line_repo.add(MetaDataLine(**_data))
+            await meta_data_line_repo.session.commit()
+            return MetaDataLineDTO.model_validate(obj)
+        except Exception as ex:
+            raise HTTPException(detail=str(ex), status_code=status_codes.HTTP_404_NOT_FOUND)
 
     @route('/{line_id:int}',
            http_method=[HttpMethod.PUT, HttpMethod.PATCH],
