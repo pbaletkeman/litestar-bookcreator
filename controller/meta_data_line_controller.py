@@ -101,10 +101,10 @@ class MetaDataController(Controller):
         """Create a new meta_data tag."""
         try:
             _data = data.model_dump(exclude_unset=True, by_alias=False, exclude_none=True)
-            # _data["slug"] = await meta_data_tag_repo.get_available_slug(_data["name"])
+            # tag = _data.pop('tag')
             obj = await meta_data_line_repo.add(MetaDataLine(**_data))
             await meta_data_line_repo.session.commit()
-            return MetaDataLineDTO.model_validate(obj)
+            return MetaDataLineCreate.model_validate(obj)
         except Exception as ex:
             raise HTTPException(detail=str(ex), status_code=status_codes.HTTP_404_NOT_FOUND)
 

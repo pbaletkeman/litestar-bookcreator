@@ -15,13 +15,12 @@ class MetaDataLine(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True, name='line_id', sort_order=-10)
     name: Mapped[str] = mapped_column(String(length=30), nullable=False, sort_order=1)
+    tag: Mapped['MetaDataTagValue'] = (
+        relationship('MetaDataTagValue', back_populates='meta_data_tag_master_value',)
+    )
     # attributes: Mapped[List['MetaDataAttributeValue']] = (
     #     relationship('MetaDataAttributeValue', back_populates='meta_data_attribute_master_value',)
     # )
-    # tag: Mapped['MetaDataTagValue'] = (
-    #     relationship('MetaDataTagValue', back_populates='meta_data_tag_master_value',)
-    # )
-    #
 
 
 class MetaDataTagValueDTO(BaseModel):
@@ -52,11 +51,11 @@ class MetaDataAttributeTag(BaseModel):
 class MetaDataLineDTO(BaseModel):
     id: Optional[int]
     name: str
-    # tag: MetaDataTagValueDTO
+    tag: MetaDataTagValueDTO
     # attributes: List[MetaDataAttributeTag] | None
 
 
 class MetaDataLineCreate(BaseModel):
     name: str
-    # tag: MetaDataValueCreate
+    tag: MetaDataValueCreate
     # attributes: List[MetaDataAttributeTag] | None
