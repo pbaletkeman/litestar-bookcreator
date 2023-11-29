@@ -103,12 +103,13 @@ class MetaDataController(Controller):
                                     data: MetaDataLineCreate, ) -> MetaDataLineDTO:
         """Create a new meta_data tag."""
         _data = data.model_dump(exclude_unset=True, by_alias=False, exclude_none=True)
-        tag: MetaDataTagValue = _data.get('tag')  # get tag element, or null
-        attributes: List[MetaDataAttributeValue] = _data.get('attributes')  # get attributes element, or null
-        _data.pop('tag', None)  # remove tag element from data source
-        _data.pop('attributes', None)  # remove attribute element from data source
+        # tag: MetaDataTagValue = _data.get('tag')  # get tag element, or null
+        # attributes: List[MetaDataAttributeValue] = _data.get('attributes')  # get attributes element, or null
+        # _data.pop('tag', None)  # remove tag element from data source
+        # _data.pop('attributes', None)  # remove attribute element from data source
         line_item = await meta_data_line_repo.add(MetaDataLine(**_data))
-
+        # return MetaDataLine.from_dto(**_data)
+        #
         return MetaDataLineDTO.model_validate(line_item)
         # try:
         #     _data = data.model_dump(exclude_unset=True, by_alias=False, exclude_none=True)

@@ -32,6 +32,7 @@ class MetaDataAttributeValue(Base):
     )
 
     meta_data_attribute_master_value: Mapped['MetaDataLine'] = (
-        relationship(foreign_keys='[MetaDataLine.id]',
-                     primaryjoin='MetaDataLine.id==MetaDataAttributeValue.line_id')
+        relationship(MetaDataLine,
+                     primaryjoin='MetaDataLine.id==MetaDataAttributeValue.line_id',
+                     back_populates='attributes')
     )

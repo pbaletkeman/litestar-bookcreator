@@ -33,8 +33,9 @@ class MetaDataTagValue(Base):
     )
 
     meta_data_tag_master_value: Mapped['MetaDataLine'] = (
-        relationship(foreign_keys='[MetaDataLine.id]',
-                     primaryjoin='MetaDataLine.id==MetaDataTagValue.line_id')
+        relationship(MetaDataLine,
+                     primaryjoin='MetaDataLine.id==MetaDataTagValue.line_id',
+                     back_populates='tag')
     )
 
     def __init__(self, **kw: Any):
