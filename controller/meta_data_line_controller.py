@@ -16,7 +16,7 @@ from litestar.repository.filters import LimitOffset, OrderBy
 from pydantic import TypeAdapter
 
 from model.meta_data_attribute_value import MetaDataAttributeValue
-from model.meta_data_line import MetaDataLine, MetaDataLineDTO, MetaDataLineCreate
+from model.meta_data_line import MetaDataLine, MetaDataLineDTO, MetaDataLineCreate, MetaDataValueCreate
 from model.meta_data_tag_value import MetaDataTagValue
 
 if TYPE_CHECKING:
@@ -96,15 +96,22 @@ class MetaDataController(Controller):
             raise HTTPException(detail=str(ex), status_code=status_codes.HTTP_404_NOT_FOUND)
 
     @post(tags=meta_data_line_controller_tag)
-    async def create_meta_data_line(self, meta_data_line_repo: MetaDataLineRepository,
+    async def create_meta_data_line(self,
+                                    meta_data_line_repo: MetaDataLineRepository,
+                                    meta_data_tag_value_repo: MetaDataTagValueRepository,
                                     data: MetaDataLineCreate, ) -> MetaDataLineDTO:
         """Create a new meta_data tag."""
         try:
             _data = data.model_dump(exclude_unset=True, by_alias=False, exclude_none=True)
-            # tag = _data.pop('tag')
-            obj = await meta_data_line_repo.add(MetaDataLine(**_data))
+            # get json element as a class
+            tag: MetaDataTagValue = _data.pop('tag')
+            saved_line: MetaDataLine = await meta_data_line_repo.add(MetaDataLine(**_data))
             await meta_data_line_repo.session.commit()
-            return MetaDataLineCreate.model_validate(obj)
+            # add foreign key of the record that was just saved
+            tag.update({'line_id': saved_line.id})
+            saved_tag: MetaDataTagValue = await meta_data_tag_value_repo.add(**tag)
+            await meta_data_tag_value_repo.session.commit()
+            return tag
         except Exception as ex:
             raise HTTPException(detail=str(ex), status_code=status_codes.HTTP_404_NOT_FOUND)
 
